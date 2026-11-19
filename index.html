@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Commerce Edge" />
+  <meta name="theme-color" content="#0F2A6B" />
+  <title>COMMERCE EDGE ADMIN</title>
+
+  <!-- Inline Dynamic PWA Manifest & Apple Touch Icon -->
+  <link id="pwa-manifest" rel="manifest" href="./manifest.webmanifest" />
+  <link id="apple-icon" rel="apple-touch-icon" />
+
+  <style>
+    :root {
+      --royal-900: #091B47;
+      --royal-800: #0F2A6B;
+      --royal-700: #173B94;
+      --royal-600: #1E4EC2;
+      --royal-100: #E8EFFD;
+      --royal-50:  #F3F7FF;
+      --gold-500:  #F5B800;
+      --gold-400:  #FFCA28;
+      --gold-100:  #FFF8DC;
+      --bg-ios:    #F2F4F8;
+      --card-bg:   #FFFFFF;
+      --text-main: #0F172A;
+      --text-sub:  #64748B;
+      --border:    #E2E8F0;
+      --green:     #10B981;
+      --green-bg:  #ECFDF5;
+      --red:       #EF4444;
+      --red-bg:    #FEF2F2;
+      --amber:     #F59E0B;
+      --amber-bg:  #FFFBEB;
+      --safe-top:  env(safe-area-inset-top, 20px);
+      --safe-bot:  env(safe-area-inset-bottom, 20px);
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-ios);
+      color: var(--text-main);
+      height: 100%;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top iOS App Bar */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, var(--royal-900) 0%, var(--royal-800) 100%);
+      color: #FFFFFF;
+      padding: calc(var(--safe-top) + 12px) 16px 14px 16px;
+      box-shadow: 0 4px 16px rgba(9, 27, 71, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
+      color: var(--royal-900);
+      font-weight: 900;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: -0.5px;
+      box-shadow: 0 2px 8px rgba(245, 184, 0, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      line-height: 1.15;
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--gold-400);
+      font-weight: 600;
+      letter-spacing: 0.4px;
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.14);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #34D399;
+    }
+
+    .status-dot.offline {
+      background: var(--gold-400);
+    }
+
+    /* Main Scroll Container */
+    .main-container {
+      padding: 16px 16px calc(92px + var(--safe-bot)) 16px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .screen {
+      display: none;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Section Headings */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0 12px 0;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--royal-900);
+      margin: 0;
+    }
+
+    /* Cards & Metrics */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card.primary {
+      background: linear-gradient(135deg, var(--royal-800), var(--royal-700));
+      color: #FFFFFF;
+      border: none;
+    }
+
+    .kpi-card.gold {
+      background: linear-gradient(135deg, #FFFDF5, var(--gold-100));
+      border-color: #FDE68A;
+    }
+
+    .kpi-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-sub);
+      margin-bottom: 6px;
+    }
+
+    .kpi-card.primary .kpi-label {
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .kpi-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--royal-900);
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-card.primary .kpi-val {
+      color: var(--gold-400);
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      margin-top: 4px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .kpi-card.primary .kpi-sub {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 44px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s ease, opacity 0.15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: var(--royal-800);
+      color: #FFFFFF;
+    }
+
+    .btn-gold {
+      background: var(--gold-500);
+      color: var(--royal-900);
+    }
+
+    .btn-outline {
+      background: var(--royal-50);
+      color: var(--royal-800);
+      border: 1px solid #CBD5E1;
+    }
+
+    .btn-danger {
+      background: var(--red-bg);
+      color: var(--red);
+      border: 1px solid #FECACA;
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 12px;
+      border-radius: 10px;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 13px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--royal-900);
+      margin-bottom: 5px;
+    }
+
+    .form-control {
+      width: 100%;
+      min-height: 44px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1.5px solid #CBD5E1;
+      background: #FFFFFF;
+      font-size: 15px;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-control:focus {
+      border-color: var(--royal-700);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    /* Subject Checkboxes */
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .subject-chip {
+      position: relative;
+    }
+
+    .subject-chip input {
+      position: absolute;
+      opacity: 0;
+    }
+
+    .subject-chip span {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--bg-ios);
+      color: var(--text-sub);
+      border: 1.5px solid var(--border);
+      cursor: pointer;
+    }
+
+    .subject-chip input:checked + span {
+      background: var(--royal-800);
+      color: var(--gold-400);
+      border-color: var(--royal-800);
+    }
+
+    /* Search & Filter Bar */
+    .search-box {
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .search-box input {
+      padding-left: 38px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-sub);
+      font-size: 16px;
+    }
+
+    /* Segmented Tabs */
+    .segmented {
+      display: flex;
+      background: #E2E8F0;
+      padding: 3px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+
+    .seg-btn {
+      flex: 1;
+      min-height: 36px;
+      border: none;
+      background: transparent;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .seg-btn.active {
+      background: #FFFFFF;
+      color: var(--royal-900);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-royal { background: var(--royal-100); color: var(--royal-800); }
+    .badge-gold  { background: var(--gold-100); color: #92400E; }
+    .badge-green { background: var(--green-bg); color: #065F46; }
+    .badge-red   { background: var(--red-bg); color: #991B1B; }
+    .badge-amber { background: var(--amber-bg); color: #92400E; }
+
+    /* Student List Item */
+    .student-item {
+      background: #FFFFFF;
+      border-radius: 15px;
+      padding: 14px;
+      margin-bottom: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
+    }
+
+    .student-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .student-name {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--royal-900);
+    }
+
+    .student-meta {
+      font-size: 12px;
+      color: var(--text-sub);
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .student-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Attendance Pills */
+    .att-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      background: #FFFFFF;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      margin-bottom: 9px;
+    }
+
+    .att-btns {
+      display: flex;
+      gap: 6px;
+    }
+
+    .att-pill {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      background: #F8FAFC;
+      font-weight: 800;
+      font-size: 13px;
+      color: var(--text-sub);
+      cursor: pointer;
+    }
+
+    .att-pill.active-P { background: var(--green); border-color: var(--green); color: #FFFFFF; }
+    .att-pill.active-A { background: var(--red); border-color: var(--red); color: #FFFFFF; }
+    .att-pill.active-L { background: var(--gold-500); border-color: var(--gold-500); color: var(--royal-900); }
+
+    /* Table Wrapper */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #FFFFFF;
+    }
+
+    th {
+      background: var(--royal-800);
+      color: #FFFFFF;
+      text-align: left;
+      padding: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Bottom Navigation Bar (iOS Tab Bar) */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 60;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 6px 4px calc(6px + var(--safe-bot)) 4px;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+    }
+
+    .nav-item {
+      border: none;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 4px 2px;
+      color: var(--text-sub);
+      cursor: pointer;
+      min-height: 48px;
+    }
+
+    .nav-item svg {
+      width: 21px;
+      height: 21px;
+      stroke-width: 2;
+    }
+
+    .nav-item span {
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .nav-item.active {
+      color: var(--royal-800);
+    }
+
+    .nav-item.active .nav-icon-wrap {
+      background: var(--gold-400);
+      color: var(--royal-900);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+
+    /* iOS Modal Sheet */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 27, 71, 0.55);
+      z-index: 100;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-sheet {
+      background: #FFFFFF;
+      width: 100%;
+      max-width: 680px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 22px 22px 0 0;
+      padding: 18px 18px calc(24px + var(--safe-bot)) 18px;
+      animation: slideUp 0.22s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .modal-handle {
+      width: 40px;
+      height: 5px;
+      border-radius: 99px;
+      background: #CBD5E1;
+      margin: 0 auto 14px auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--royal-900);
+      margin: 0;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      top: calc(var(--safe-top) + 68px);
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      background: var(--royal-900);
+      color: var(--gold-400);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.22s ease;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 28px 16px;
+      color: var(--text-sub);
+      font-size: 13px;
+    }
+
+    .progress-track {
+      height: 8px;
+      background: #E2E8F0;
+      border-radius: 99px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 99px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="brand-wrap">
+      <div class="brand-logo">CE</div>
+      <div>
+        <div class="brand-title">COMMERCE EDGE ADMIN</div>
+        <div class="brand-sub">Odalbakra, Guwahati • Single Admin</div>
+      </div>
+    </div>
+    <div class="status-pill" id="network-status">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Offline Ready</span>
+    </div>
+  </header>
+
+  <!-- Toast -->
+  <div id="toast" class="toast">Saved</div>
+
+  <!-- Main Content -->
+  <main class="main-container">
+
+    <!-- 1. DASHBOARD SCREEN -->
+    <section id="screen-dashboard" class="screen active">
+      <div class="section-head">
+        <h1 class="section-title">Admin Overview</h1>
+        <span class="badge badge-royal" id="dash-today-label"></span>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card primary">
+          <div class="kpi-label">Total Students</div>
+          <div class="kpi-val" id="kpi-students">0</div>
+          <div class="kpi-sub" id="kpi-batches-sub">0 Active Batches</div>
+        </div>
+        <div class="kpi-card gold">
+          <div class="kpi-label">Today's Attendance</div>
+          <div class="kpi-val" id="kpi-attendance">0%</div>
+          <div class="kpi-sub" id="kpi-att-sub">0 Present / 0 Marked</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Monthly Collection</div>
+          <div class="kpi-val" style="color: var(--green);" id="kpi-collected">₹0</div>
+          <div class="kpi-sub" id="kpi-month-sub">This Month</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Pending Fees</div>
+          <div class="kpi-val" style="color: var(--red);" id="kpi-pending">₹0</div>
+          <div class="kpi-sub" id="kpi-defaulters-sub">0 Students Due</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:10px;">Quick Admin Actions</div>
+        <div class="quick-actions">
+          <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+          <button class="btn btn-gold" onclick="switchTab('attendance')">Mark Attendance</button>
+          <button class="btn btn-outline" onclick="openFeePaymentModal()">Record Fee Payment</button>
+          <button class="btn btn-outline" onclick="openExamModal()">+ Add Exam Marks</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <span style="font-weight:800; font-size:14px; color:var(--royal-900);">Batch Strength</span>
+          <span class="badge badge-gold">2026–27 Session</span>
+        </div>
+        <div id="dash-batch-breakdown"></div>
+      </div>
+
+      <div class="card">
+        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:10px;">Recent Fee Receipts</div>
+        <div id="dash-recent-fees"></div>
+      </div>
+    </section>
+
+    <!-- 2. STUDENTS SCREEN -->
+    <section id="screen-students" class="screen">
+      <div class="section-head">
+        <h1 class="section-title">Students</h1>
+        <button class="btn btn-gold btn-sm" onclick="openStudentModal()">+ New Student</button>
+      </div>
+
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="student-search" class="form-control" placeholder="Search name, phone, batch, guardian..." oninput="renderStudents()" />
+      </div>
+
+      <div class="form-row" style="margin-bottom:12px;">
+        <select id="filter-class" class="form-control" onchange="renderStudents()">
+          <option value="">All Classes</option>
+          <option value="Class 11">Class 11</option>
+          <option value="Class 12">Class 12</option>
+          <option value="B.Com">B.Com</option>
+        </select>
+        <select id="filter-batch" class="form-control" onchange="renderStudents()">
+          <option value="">All Batches</option>
+        </select>
+      </div>
+
+      <div id="student-list"></div>
+    </section>
+
+    <!-- 3. ATTENDANCE SCREEN -->
+    <section id="screen-attendance" class="screen">
+      <div class="section-head">
+        <h1 class="section-title">Attendance</h1>
+      </div>
+
+      <div class="segmented">
+        <button class="seg-btn active" id="att-tab-daily" onclick="switchAttSubtab('daily')">Daily Register</button>
+        <button class="seg-btn" id="att-tab-monthly" onclick="switchAttSubtab('monthly')">Monthly Report</button>
+      </div>
+
+      <!-- Daily Register -->
+      <div id="att-daily-view">
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Date</label>
+              <input type="date" id="att-date" class="form-control" onchange="renderDailyAttendance()" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Batch Filter</label>
+              <select id="att-batch-filter" class="form-control" onchange="renderDailyAttendance()">
+                <option value="">All Batches</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="markAllAttendance('P')">Mark All Present</button>
+            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveDailyAttendance()">Save Register</button>
+          </div>
+        </div>
+        <div id="att-student-rows"></div>
+      </div>
+
+      <!-- Monthly Attendance Report -->
+      <div id="att-monthly-view" style="display:none;">
+        <div class="card">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Select Month</label>
+              <input type="month" id="att-month" class="form-control" onchange="renderMonthlyAttendance()" />
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Batch</label>
+              <select id="att-month-batch" class="form-control" onchange="renderMonthlyAttendance()">
+                <option value="">All Batches</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div id="att-monthly-table"></div>
+      </div>
+    </section>
+
+    <!-- 4. MARKS SCREEN -->
+    <section id="screen-marks" class="screen">
+      <div class="section-head">
+        <h1 class="section-title">Exam Marks</h1>
+        <button class="btn btn-gold btn-sm" onclick="openExamModal()">+ Add Marks</button>
+      </div>
+
+      <div class="form-row" style="margin-bottom:12px;">
+        <select id="marks-student-filter" class="form-control" onchange="renderMarks()">
+          <option value="">All Students</option>
+        </select>
+        <select id="marks-subject-filter" class="form-control" onchange="renderMarks()">
+          <option value="">All Subjects</option>
+          <option value="Accountancy">Accountancy</option>
+          <option value="Business Studies">Business Studies</option>
+          <option value="Economics">Economics</option>
+          <option value="Finance">Finance</option>
+          <option value="English">English</option>
+        </select>
+      </div>
+
+      <div id="marks-list"></div>
+    </section>
+
+    <!-- 5. FEES SCREEN -->
+    <section id="screen-fees" class="screen">
+      <div class="section-head">
+        <h1 class="section-title">Fees & Ledger</h1>
+        <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal()">+ Collect Fee</button>
+      </div>
+
+      <div class="segmented">
+        <button class="seg-btn active" id="fee-tab-balances" onclick="switchFeeSubtab('balances')">Student Balances</button>
+        <button class="seg-btn" id="fee-tab-history" onclick="switchFeeSubtab('history')">Payment History</button>
+      </div>
+
+      <div id="fee-balances-view">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="fee-search" class="form-control" placeholder="Filter student fee status..." oninput="renderFees()" />
+        </div>
+        <div id="fee-student-cards"></div>
+      </div>
+
+      <div id="fee-history-view" style="display:none;">
+        <div id="fee-payments-list"></div>
+      </div>
+    </section>
+
+    <!-- 6. REPORTS & BACKUP SCREEN -->
+    <section id="screen-more" class="screen">
+      <div class="section-head">
+        <h1 class="section-title">Reports & Backup</h1>
+      </div>
+
+      <!-- CSV Reports -->
+      <div class="card">
+        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Export CSV Reports</div>
+        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Download Excel-compatible CSV spreadsheets directly to your iPhone Files app.</div>
+
+        <div class="form-group">
+          <label class="form-label">Batch-wise Master Report</label>
+          <div style="display:flex; gap:8px;">
+            <select id="report-batch-select" class="form-control">
+              <option value="">All Batches</option>
+            </select>
+            <button class="btn btn-primary" onclick="exportBatchCSV()">Export CSV</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label">Student-wise Complete Report</label>
+          <div style="display:flex; gap:8px;">
+            <select id="report-student-select" class="form-control"></select>
+            <button class="btn btn-gold" onclick="exportStudentCSV()">Export CSV</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Report Preview -->
+      <div class="card">
+        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:10px;">Batch Summary Preview</div>
+        <div id="batch-report-preview"></div>
+      </div>
+
+      <!-- JSON Backup & Restore -->
+      <div class="card">
+        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Full Offline JSON Backup</div>
+        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Export all students, attendance, exam marks, and fee records into a portable JSON file.</div>
+        <button class="btn btn-primary btn-block" style="margin-bottom:10px;" onclick="exportJSONBackup()">⬇ Download Complete JSON Backup</button>
+
+        <label class="btn btn-outline btn-block" style="cursor:pointer;">
+          ⬆ Restore from JSON Backup
+          <input type="file" id="restore-json-input" accept=".json,application/json" style="display:none;" onchange="restoreJSONBackup(event)" />
+        </label>
+      </div>
+
+      <!-- Sample Data / Reset -->
+      <div class="card">
+        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:8px;">Data Utilities</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="seedDemoData()">Load Sample Data</button>
+          <button class="btn btn-danger btn-sm" style="flex:1;" onclick="clearAllDatabase()">Reset All Data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom iOS Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      </div>
+      <span>Home</span>
+    </button>
+    <button class="nav-item" data-tab="students" onclick="switchTab('students')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <span>Students</span>
+    </button>
+    <button class="nav-item" data-tab="attendance" onclick="switchTab('attendance')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <span>Attend</span>
+    </button>
+    <button class="nav-item" data-tab="marks" onclick="switchTab('marks')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <span>Marks</span>
+    </button>
+    <button class="nav-item" data-tab="fees" onclick="switchTab('fees')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <span>Fees</span>
+    </button>
+    <button class="nav-item" data-tab="more" onclick="switchTab('more')">
+      <div class="nav-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      <span>Reports</span>
+    </button>
+  </nav>
+
+  <!-- MODAL 1: ADD / EDIT STUDENT -->
+  <div class="modal-backdrop" id="modal-student">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title" id="student-modal-title">Add Student</h2>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-student')">Close</button>
+      </div>
+      <form id="form-student" onsubmit="saveStudent(event)">
+        <input type="hidden" id="stu-id" />
+        <div class="form-group">
+          <label class="form-label">Student Full Name *</label>
+          <input type="text" id="stu-name" class="form-control" required placeholder="e.g., Rahul Sharma" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Student Phone *</label>
+            <input type="tel" id="stu-phone" class="form-control" required pattern="[0-9+\s-]{10,15}" placeholder="98640XXXXX" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Admission Date *</label>
+            <input type="date" id="stu-admission" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Class / Stream *</label>
+            <select id="stu-class" class="form-control" required>
+              <option value="Class 11">Class 11 (HS 1st Year)</option>
+              <option value="Class 12">Class 12 (HS 2nd Year)</option>
+              <option value="B.Com">B.Com</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Batch Name *</label>
+            <input type="text" id="stu-batch" class="form-control" required list="batch-suggestions" placeholder="e.g., Morning XI-A" />
+            <datalist id="batch-suggestions">
+              <option value="Morning XI-A">
+              <option value="Evening XII-A">
+              <option value="CBSE XII Commerce">
+              <option value="ASSEB XII Commerce">
+            </datalist>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subjects Enrolled *</label>
+          <div class="chip-group" id="stu-subjects-group">
+            <label class="subject-chip"><input type="checkbox" value="Accountancy" checked /><span>Accountancy</span></label>
+            <label class="subject-chip"><input type="checkbox" value="Business Studies" checked /><span>Business Studies</span></label>
+            <label class="subject-chip"><input type="checkbox" value="Economics" /><span>Economics</span></label>
+            <label class="subject-chip"><input type="checkbox" value="Finance" /><span>Finance</span></label>
+            <label class="subject-chip"><input type="checkbox" value="English" /><span>English</span></label>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Guardian Name *</label>
+            <input type="text" id="stu-guardian" class="form-control" required placeholder="Parent / Guardian" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Guardian Phone *</label>
+            <input type="tel" id="stu-guardian-phone" class="form-control" required pattern="[0-9+\s-]{10,15}" placeholder="94350XXXXX" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Total Course / Annual Fee (₹) *</label>
+          <input type="number" id="stu-total-fee" class="form-control" required min="0" step="100" placeholder="12000" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Student Record</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD EXAM MARKS -->
+  <div class="modal-backdrop" id="modal-exam">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title">Add Examination Marks</h2>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-exam')">Close</button>
+      </div>
+      <form id="form-exam" onsubmit="saveExamMark(event)">
+        <div class="form-group">
+          <label class="form-label">Select Student *</label>
+          <select id="exam-student" class="form-control" required></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Exam Title *</label>
+            <input type="text" id="exam-title" class="form-control" required placeholder="Unit Test 1 / Pre-Board" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Exam Date *</label>
+            <input type="date" id="exam-date" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Subject *</label>
+          <select id="exam-subject" class="form-control" required>
+            <option value="Accountancy">Accountancy</option>
+            <option value="Business Studies">Business Studies</option>
+            <option value="Economics">Economics</option>
+            <option value="Finance">Finance</option>
+            <option value="English">English</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Marks Obtained *</label>
+            <input type="number" id="exam-obtained" class="form-control" required min="0" step="0.5" placeholder="78" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Maximum Marks *</label>
+            <input type="number" id="exam-max" class="form-control" required min="1" step="1" value="100" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Exam Score</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: RECORD FEE PAYMENT -->
+  <div class="modal-backdrop" id="modal-fee">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title">Record Fee Payment</h2>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-fee')">Close</button>
+      </div>
+      <form id="form-fee" onsubmit="saveFeePayment(event)">
+        <div class="form-group">
+          <label class="form-label">Select Student *</label>
+          <select id="fee-student" class="form-control" required onchange="updateFeeModalHint()"></select>
+          <div id="fee-balance-hint" style="font-size:12px; color:var(--royal-800); font-weight:700; margin-top:5px;"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount Paid (₹) *</label>
+            <input type="number" id="fee-amount" class="form-control" required min="1" step="1" placeholder="2000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Payment Date *</label>
+            <input type="date" id="fee-date" class="form-control" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Payment Mode *</label>
+            <select id="fee-mode" class="form-control" required>
+              <option value="UPI">UPI (GPay / PhonePe)</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Note / Month</label>
+            <input type="text" id="fee-note" class="form-control" placeholder="e.g., Nov Installment" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-gold btn-block">Confirm & Save Receipt</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: STUDENT PROFILE & PERFORMANCE HISTORY -->
+  <div class="modal-backdrop" id="modal-profile">
+    <div class="modal-sheet">
+      <div class="modal-handle"></div>
+      <div class="modal-header">
+        <h2 class="modal-title" id="profile-title">Student Profile</h2>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-profile')">Close</button>
+      </div>
+      <div id="profile-body"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       1. LOCAL APP ICON & CONNECTION STATUS
+       ========================================================================== */
+    (function setupPWA() {
+      // Generate PNG Icon dynamically via Canvas for iOS Home Screen
+      const iconCanvas = document.createElement('canvas');
+      iconCanvas.width = 512;
+      iconCanvas.height = 512;
+      const ctx = iconCanvas.getContext('2d');
+      ctx.fillStyle = '#0F2A6B';
+      ctx.fillRect(0, 0, 512, 512);
+      ctx.fillStyle = '#F5B800';
+      ctx.beginPath();
+      ctx.roundRect(48, 48, 416, 416, 90);
+      ctx.fill();
+      ctx.fillStyle = '#091B47';
+      ctx.font = '900 190px -apple-system, BlinkMacSystemFont, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CE', 256, 268);
+      const iconDataUrl = iconCanvas.toDataURL('image/png');
+      document.getElementById('apple-icon').href = iconDataUrl;
+
+      // Online/Offline indicator
+      function updateOnlineStatus() {
+        const dot = document.getElementById('status-dot');
+        const txt = document.getElementById('status-text');
+        if (navigator.onLine) {
+          dot.classList.remove('offline');
+          txt.textContent = 'Local Storage Active';
+        } else {
+          dot.classList.add('offline');
+          txt.textContent = 'Offline Mode';
+        }
+      }
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      updateOnlineStatus();
+    })();
+
+    /* ==========================================================================
+       2. INDEXEDDB STORAGE ENGINE
+       ========================================================================== */
+    const DB_NAME = 'CommerceEdgeAdminDB';
+    const DB_VERSION = 1;
+    let db = null;
+
+    let state = {
+      students: [],
+      attendance: [], // { id: "date_studentId", date: "YYYY-MM-DD", studentId: "...", status: "P"|"A"|"L" }
+      marks: [],      // { id, studentId, examTitle, date, subject, obtained, max }
+      fees: []        // { id, studentId, amount, date, mode, note }
+    };
+
+    function openDatabase() {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open(DB_NAME, DB_VERSION);
+        req.onupgradeneeded = (e) => {
+          const database = e.target.result;
+          if (!database.objectStoreNames.contains('students')) {
+            database.createObjectStore('students', { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains('attendance')) {
+            database.createObjectStore('attendance', { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains('marks')) {
+            database.createObjectStore('marks', { keyPath: 'id' });
+          }
+          if (!database.objectStoreNames.contains('fees')) {
+            database.createObjectStore('fees', { keyPath: 'id' });
+          }
+        };
+        req.onsuccess = (e) => {
+          db = e.target.result;
+          resolve(db);
+        };
+        req.onerror = (e) => reject(e.target.error);
+      });
+    }
+
+    function dbGetAll(storeName) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readonly');
+        const store = tx.objectStore(storeName);
+        const req = store.getAll();
+        req.onsuccess = () => resolve(req.result || []);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function dbPut(storeName, item) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        const req = store.put(item);
+        req.onsuccess = () => resolve(item);
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function dbDelete(storeName, id) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        const req = store.delete(id);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    function dbClear(storeName) {
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(storeName, 'readwrite');
+        const store = tx.objectStore(storeName);
+        const req = store.clear();
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
+      });
+    }
+
+    async function loadAllState() {
+      const [students, attendance, marks, fees] = await Promise.all([
+        dbGetAll('students'),
+        dbGetAll('attendance'),
+        dbGetAll('marks'),
+        dbGetAll('fees')
+      ]);
+      state.students = students.sort((a, b) => a.name.localeCompare(b.name));
+      state.attendance = attendance;
+      state.marks = marks.sort((a, b) => b.date.localeCompare(a.date));
+      state.fees = fees.sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    /* ==========================================================================
+       3. HELPERS & NAVIGATION
+       ========================================================================== */
+    function todayStr() {
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now - offset).toISOString().slice(0, 10);
+    }
+
+    function currentMonthStr() {
+      return todayStr().slice(0, 7);
+    }
+
+    function formatINR(num) {
+      return '₹' + Number(num || 0).toLocaleString('en-IN');
+    }
+
+    function uid(prefix) {
+      return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+    }
+
+    function esc(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove('show'), 2300);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.getElementById('screen-' + tabName).classList.add('active');
+      document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
+      refreshAllViews();
+    }
+
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    function populateBatchAndStudentDropdowns() {
+      const batches = [...new Set(state.students.map(s => s.batch).filter(Boolean))].sort();
+      const batchSelectIds = ['filter-batch', 'att-batch-filter', 'att-month-batch', 'report-batch-select'];
+      batchSelectIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const prev = el.value;
+        el.innerHTML = '<option value="">All Batches</option>' +
+          batches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
+        if (batches.includes(prev)) el.value = prev;
+      });
+
+      const studentOptions = state.students.map(s =>
+        `<option value="${esc(s.id)}">${esc(s.name)} (${esc(s.class)} • ${esc(s.batch)})</option>`
+      ).join('');
+
+      const marksFilter = document.getElementById('marks-student-filter');
+      const prevMarkStu = marksFilter.value;
+      marksFilter.innerHTML = '<option value="">All Students</option>' + studentOptions;
+      marksFilter.value = prevMarkStu;
+
+      ['exam-student', 'fee-student', 'report-student-select'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const prev = el.value;
+        el.innerHTML = state.students.length
+          ? studentOptions
+          : '<option value="">No students added yet</option>';
+        if (prev && state.students.some(s => s.id === prev)) el.value = prev;
+      });
+    }
+
+    /* ==========================================================================
+       4. DASHBOARD RENDERING
+       ========================================================================== */
+    function renderDashboard() {
+      const today = todayStr();
+      const month = currentMonthStr();
+      document.getElementById('dash-today-label').textContent = today;
+
+      const totalStudents = state.students.length;
+      const uniqueBatches = new Set(state.students.map(s => s.batch)).size;
+      document.getElementById('kpi-students').textContent = totalStudents;
+      document.getElementById('kpi-batches-sub').textContent = `${uniqueBatches} Active Batch${uniqueBatches === 1 ? '' : 'es'}`;
+
+      // Today's attendance
+      const todayAtt = state.attendance.filter(a => a.date === today);
+      const presentCount = todayAtt.filter(a => a.status === 'P').length;
+      const markedCount = todayAtt.length;
+      const attPct = markedCount > 0 ? Math.round((presentCount / markedCount) * 100) : 0;
+      document.getElementById('kpi-attendance').textContent = `${attPct}%`;
+      document.getElementById('kpi-att-sub').textContent = `${presentCount} Present / ${markedCount} Marked`;
+
+      // Monthly collections & total pending
+      const monthCollected = state.fees
+        .filter(f => f.date.startsWith(month))
+        .reduce((sum, f) => sum + Number(f.amount || 0), 0);
+      document.getElementById('kpi-collected').textContent = formatINR(monthCollected);
+      document.getElementById('kpi-month-sub').textContent = `Month: ${month}`;
+
+      let totalPending = 0;
+      let defaulters = 0;
+      state.students.forEach(stu => {
+        const paid = state.fees
+          .filter(f => f.studentId === stu.id)
+          .reduce((sum, f) => sum + Number(f.amount || 0), 0);
+        const due = Math.max(0, Number(stu.totalFee || 0) - paid);
+        totalPending += due;
+        if (due > 0) defaulters++;
+      });
+      document.getElementById('kpi-pending').textContent = formatINR(totalPending);
+      document.getElementById('kpi-defaulters-sub').textContent = `${defaulters} Student${defaulters === 1 ? '' : 's'} Due`;
+
+      // Batch breakdown
+      const batchMap = {};
+      state.students.forEach(s => {
+        batchMap[s.batch] = (batchMap[s.batch] || 0) + 1;
+      });
+      const batchContainer = document.getElementById('dash-batch-breakdown');
+      const batchKeys = Object.keys(batchMap);
+      if (!batchKeys.length) {
+        batchContainer.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">No students enrolled yet. Tap "+ Add Student" to begin.</div>';
+      } else {
+        batchContainer.innerHTML = batchKeys.map(b => {
+          const pct = Math.round((batchMap[b] / totalStudents) * 100);
+          return `
+            <div style="margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+                <span>${esc(b)}</span>
+                <span>${batchMap[b]} Students</span>
+              </div>
+              <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:var(--royal-700);"></div></div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Recent fees
+      const recentContainer = document.getElementById('dash-recent-fees');
+      const recentFees = state.fees.slice(0, 4);
+      if (!recentFees.length) {
+        recentContainer.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">No fee receipts recorded yet.</div>';
+      } else {
+        recentContainer.innerHTML = recentFees.map(f => {
+          const stu = state.students.find(s => s.id === f.studentId);
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
+              <div>
+                <div style="font-size:13px; font-weight:700;">${esc(stu ? stu.name : 'Deleted Student')}</div>
+                <div style="font-size:11px; color:var(--text-sub);">${esc(f.date)} • ${esc(f.mode)}</div>
+              </div>
+              <span class="badge badge-green">+${formatINR(f.amount)}</span>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    /* ==========================================================================
+       5. STUDENT MANAGEMENT (CRUD + SEARCH + PROFILE)
+       ========================================================================== */
+    function openStudentModal(studentId = null) {
+      const form = document.getElementById('form-student');
+      form.reset();
+      document.getElementById('stu-id').value = '';
+      document.getElementById('stu-admission').value = todayStr();
+      document.getElementById('student-modal-title').textContent = 'Add Student';
+
+      document.querySelectorAll('#stu-subjects-group input').forEach(cb => {
+        cb.checked = (cb.value === 'Accountancy' || cb.value === 'Business Studies');
+      });
+
+      if (studentId) {
+        const s = state.students.find(x => x.id === studentId);
+        if (!s) return;
+        document.getElementById('student-modal-title').textContent = 'Edit Student';
+        document.getElementById('stu-id').value = s.id;
+        document.getElementById('stu-name').value = s.name;
+        document.getElementById('stu-phone').value = s.phone;
+        document.getElementById('stu-admission').value = s.admissionDate;
+        document.getElementById('stu-class').value = s.class;
+        document.getElementById('stu-batch').value = s.batch;
+        document.getElementById('stu-guardian').value = s.guardianName;
+        document.getElementById('stu-guardian-phone').value = s.guardianPhone;
+        document.getElementById('stu-total-fee').value = s.totalFee;
+        document.querySelectorAll('#stu-subjects-group input').forEach(cb => {
+          cb.checked = (s.subjects || []).includes(cb.value);
+        });
+      }
+      openModal('modal-student');
+    }
+
+    async function saveStudent(e) {
+      e.preventDefault();
+      const subjects = Array.from(document.querySelectorAll('#stu-subjects-group input:checked')).map(c => c.value);
+      if (subjects.length === 0) {
+        alert('Please select at least one subject.');
+        return;
+      }
+
+      const id = document.getElementById('stu-id').value || uid('stu');
+      const studentObj = {
+        id,
+        name: document.getElementById('stu-name').value.trim(),
+        phone: document.getElementById('stu-phone').value.trim(),
+        admissionDate: document.getElementById('stu-admission').value,
+        class: document.getElementById('stu-class').value,
+        batch: document.getElementById('stu-batch').value.trim(),
+        subjects,
+        guardianName: document.getElementById('stu-guardian').value.trim(),
+        guardianPhone: document.getElementById('stu-guardian-phone').value.trim(),
+        totalFee: Number(document.getElementById('stu-total-fee').value || 0)
+      };
+
+      await dbPut('students', studentObj);
+      await loadAllState();
+      closeModal('modal-student');
+      refreshAllViews();
+      showToast('Student record saved');
+    }
+
+    async function deleteStudent(id) {
+      const stu = state.students.find(s => s.id === id);
+      if (!stu) return;
+      const confirmed = confirm(`Delete ${stu.name}?\n\nThis will also remove their attendance, exam marks, and fee payment records.`);
+      if (!confirmed) return;
+
+      await dbDelete('students', id);
+      const attToDelete = state.attendance.filter(a => a.studentId === id);
+      const marksToDelete = state.marks.filter(m => m.studentId === id);
+      const feesToDelete = state.fees.filter(f => f.studentId === id);
+
+      for (const a of attToDelete) await dbDelete('attendance', a.id);
+      for (const m of marksToDelete) await dbDelete('marks', m.id);
+      for (const f of feesToDelete) await dbDelete('fees', f.id);
+
+      await loadAllState();
+      refreshAllViews();
+      showToast('Student deleted');
+    }
+
+    function renderStudents() {
+      const q = document.getElementById('student-search').value.trim().toLowerCase();
+      const cls = document.getElementById('filter-class').value;
+      const batch = document.getElementById('filter-batch').value;
+
+      const filtered = state.students.filter(s => {
+        const matchQ = !q ||
+          s.name.toLowerCase().includes(q) ||
+          s.phone.toLowerCase().includes(q) ||
+          s.batch.toLowerCase().includes(q) ||
+          s.guardianName.toLowerCase().includes(q);
+        const matchCls = !cls || s.class === cls;
+        const matchBatch = !batch || s.batch === batch;
+        return matchQ && matchCls && matchBatch;
+      });
+
+      const container = document.getElementById('student-list');
+      if (!filtered.length) {
+        container.innerHTML = '<div class="card empty-state">No matching students found. Tap "+ New Student" to add one.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
+        const bal = Math.max(0, Number(s.totalFee) - paid);
+        return `
+          <div class="student-item">
+            <div class="student-top">
+              <div>
+                <div class="student-name">${esc(s.name)}</div>
+                <div class="student-meta">
+                  <strong>${esc(s.class)}</strong> • Batch: ${esc(s.batch)}<br/>
+                  📞 ${esc(s.phone)} | Guardian: ${esc(s.guardianName)} (${esc(s.guardianPhone)})<br/>
+                  Admitted: ${esc(s.admissionDate)}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge ${bal === 0 ? 'badge-green' : 'badge-amber'}">
+                  ${bal === 0 ? 'Fees Paid' : 'Due ' + formatINR(bal)}
+                </span>
+              </div>
+            </div>
+            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;">
+              ${(s.subjects || []).map(sub => `<span class="badge badge-royal">${esc(sub)}</span>`).join('')}
+            </div>
+            <div class="student-actions">
+              <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openStudentProfile('${esc(s.id)}')">History</button>
+              <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openStudentModal('${esc(s.id)}')">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteStudent('${esc(s.id)}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openStudentProfile(studentId) {
+      const s = state.students.find(x => x.id === studentId);
+      if (!s) return;
+
+      const attRecords = state.attendance.filter(a => a.studentId === studentId);
+      const pCount = attRecords.filter(a => a.status === 'P').length;
+      const attPct = attRecords.length ? Math.round((pCount / attRecords.length) * 100) : 0;
+
+      const marksRecords = state.marks.filter(m => m.studentId === studentId);
+      const feeRecords = state.fees.filter(f => f.studentId === studentId);
+      const totalPaid = feeRecords.reduce((sum, f) => sum + Number(f.amount), 0);
+      const balance = Math.max(0, Number(s.totalFee) - totalPaid);
+
+      document.getElementById('profile-title').textContent = s.name;
+      document.getElementById('profile-body').innerHTML = `
+        <div class="card" style="background:var(--royal-50);">
+          <div style="font-size:13px; line-height:1.6;">
+            <strong>Class & Batch:</strong> ${esc(s.class)} — ${esc(s.batch)}<br/>
+            <strong>Student Phone:</strong> ${esc(s.phone)}<br/>
+            <strong>Guardian:</strong> ${esc(s.guardianName)} (${esc(s.guardianPhone)})<br/>
+            <strong>Admission Date:</strong> ${esc(s.admissionDate)}<br/>
+            <strong>Attendance Rate:</strong> ${attPct}% (${pCount}/${attRecords.length} classes)<br/>
+            <strong>Fee Summary:</strong> Total ${formatINR(s.totalFee)} | Paid ${formatINR(totalPaid)} | <strong style="color:var(--red);">Due ${formatINR(balance)}</strong>
+          </div>
+        </div>
+
+        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin:12px 0 6px;">Academic Performance History</div>
+        ${marksRecords.length ? `
+          <div class="table-wrap" style="margin-bottom:14px;">
+            <table>
+              <thead><tr><th>Exam</th><th>Subject</th><th>Score</th><th>%</th></tr></thead>
+              <tbody>
+                ${marksRecords.map(m => {
+                  const pct = ((m.obtained / m.max) * 100).toFixed(1);
+                  return `<tr><td>${esc(m.examTitle)}<br/><small style="color:var(--text-sub);">${esc(m.date)}</small></td><td>${esc(m.subject)}</td><td>${m.obtained}/${m.max}</td><td><strong>${pct}%</strong></td></tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : '<div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">No exam marks recorded yet.</div>'}
+
+        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin:12px 0 6px;">Fee Payment History</div>
+        ${feeRecords.length ? `
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th></tr></thead>
+              <tbody>
+                ${feeRecords.map(f => `<tr><td>${esc(f.date)}</td><td><strong>${formatINR(f.amount)}</strong></td><td>${esc(f.mode)}</td><td>${esc(f.note || '-')}</td></tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : '<div style="font-size:12px; color:var(--text-sub);">No fee payments recorded yet.</div>'}
+      `;
+      openModal('modal-profile');
+    }
+
+    /* ==========================================================================
+       6. ATTENDANCE MANAGEMENT (DAILY P/A/L & MONTHLY REPORT)
+       ========================================================================== */
+    let draftAttendance = {}; // { studentId: 'P'|'A'|'L' }
+
+    function switchAttSubtab(sub) {
+      document.getElementById('att-tab-daily').classList.toggle('active', sub === 'daily');
+      document.getElementById('att-tab-monthly').classList.toggle('active', sub === 'monthly');
+      document.getElementById('att-daily-view').style.display = sub === 'daily' ? 'block' : 'none';
+      document.getElementById('att-monthly-view').style.display = sub === 'monthly' ? 'block' : 'none';
+      if (sub === 'daily') renderDailyAttendance();
+      else renderMonthlyAttendance();
+    }
+
+    function renderDailyAttendance() {
+      const dateInput = document.getElementById('att-date');
+      if (!dateInput.value) dateInput.value = todayStr();
+      const dateVal = dateInput.value;
+      const batchVal = document.getElementById('att-batch-filter').value;
+
+      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
+      const container = document.getElementById('att-student-rows');
+
+      if (!list.length) {
+        container.innerHTML = '<div class="card empty-state">No students available for this batch.</div>';
+        return;
+      }
+
+      // Sync draftAttendance with saved DB records for the chosen date
+      draftAttendance = {};
+      list.forEach(s => {
+        const existing = state.attendance.find(a => a.date === dateVal && a.studentId === s.id);
+        if (existing) draftAttendance[s.id] = existing.status;
+      });
+
+      container.innerHTML = list.map(s => {
+        const st = draftAttendance[s.id] || '';
+        return `
+          <div class="att-row" id="att-row-${esc(s.id)}">
+            <div>
+              <div style="font-weight:800; font-size:14px; color:var(--royal-900);">${esc(s.name)}</div>
+              <div style="font-size:11px; color:var(--text-sub);">${esc(s.class)} • ${esc(s.batch)}</div>
+            </div>
+            <div class="att-btns">
+              <button type="button" class="att-pill ${st === 'P' ? 'active-P' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'P')">P</button>
+              <button type="button" class="att-pill ${st === 'A' ? 'active-A' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'A')">A</button>
+              <button type="button" class="att-pill ${st === 'L' ? 'active-L' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'L')">L</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function setStudentAtt(studentId, status) {
+      draftAttendance[studentId] = status;
+      const row = document.getElementById('att-row-' + studentId);
+      if (!row) return;
+      row.querySelectorAll('.att-pill').forEach(btn => {
+        btn.classList.remove('active-P', 'active-A', 'active-L');
+        if (btn.textContent === status) btn.classList.add('active-' + status);
+      });
+    }
+
+    function markAllAttendance(status) {
+      const batchVal = document.getElementById('att-batch-filter').value;
+      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
+      list.forEach(s => setStudentAtt(s.id, status));
+      showToast('Marked visible students as Present');
+    }
+
+    async function saveDailyAttendance() {
+      const dateVal = document.getElementById('att-date').value;
+      if (!dateVal) {
+        alert('Please select a valid date.');
+        return;
+      }
+      const entries = Object.entries(draftAttendance);
+      if (!entries.length) {
+        alert('Mark at least one student as P, A, or L before saving.');
+        return;
+      }
+      for (const [studentId, status] of entries) {
+        await dbPut('attendance', {
+          id: `${dateVal}_${studentId}`,
+          date: dateVal,
+          studentId,
+          status
+        });
+      }
+      await loadAllState();
+      renderDashboard();
+      showToast(`Attendance saved for ${dateVal}`);
+    }
+
+    function renderMonthlyAttendance() {
+      const monthInput = document.getElementById('att-month');
+      if (!monthInput.value) monthInput.value = currentMonthStr();
+      const monthVal = monthInput.value;
+      const batchVal = document.getElementById('att-month-batch').value;
+
+      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
+      const container = document.getElementById('att-monthly-table');
+
+      if (!list.length) {
+        container.innerHTML = '<div class="card empty-state">No students found for this filter.</div>';
+        return;
+      }
+
+      const rows = list.map(s => {
+        const recs = state.attendance.filter(a => a.studentId === s.id && a.date.startsWith(monthVal));
+        const p = recs.filter(r => r.status === 'P').length;
+        const a = recs.filter(r => r.status === 'A').length;
+        const l = recs.filter(r => r.status === 'L').length;
+        const total = recs.length;
+        const pct = total ? Math.round((p / total) * 100) : 0;
+        return `
+          <tr>
+            <td><strong>${esc(s.name)}</strong><br/><small style="color:var(--text-sub);">${esc(s.batch)}</small></td>
+            <td style="color:var(--green); font-weight:700;">${p}</td>
+            <td style="color:var(--red); font-weight:700;">${a}</td>
+            <td style="color:var(--amber); font-weight:700;">${l}</td>
+            <td><strong>${pct}%</strong></td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Student</th><th>P</th><th>A</th><th>L</th><th>%</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    /* ==========================================================================
+       7. MARKS MANAGEMENT
+       ========================================================================== */
+    function openExamModal() {
+      if (!state.students.length) {
+        alert('Please add a student first before entering exam marks.');
+        return;
+      }
+      document.getElementById('form-exam').reset();
+      document.getElementById('exam-date').value = todayStr();
+      document.getElementById('exam-max').value = 100;
+      populateBatchAndStudentDropdowns();
+      openModal('modal-exam');
+    }
+
+    async function saveExamMark(e) {
+      e.preventDefault();
+      const obtained = Number(document.getElementById('exam-obtained').value);
+      const max = Number(document.getElementById('exam-max').value);
+      if (obtained > max) {
+        alert('Marks obtained cannot exceed maximum marks.');
+        return;
+      }
+
+      const record = {
+        id: uid('mark'),
+        studentId: document.getElementById('exam-student').value,
+        examTitle: document.getElementById('exam-title').value.trim(),
+        date: document.getElementById('exam-date').value,
+        subject: document.getElementById('exam-subject').value,
+        obtained,
+        max
+      };
+
+      await dbPut('marks', record);
+      await loadAllState();
+      closeModal('modal-exam');
+      renderMarks();
+      showToast('Exam marks added');
+    }
+
+    async function deleteExamMark(id) {
+      if (!confirm('Delete this exam mark record?')) return;
+      await dbDelete('marks', id);
+      await loadAllState();
+      renderMarks();
+      showToast('Exam record deleted');
+    }
+
+    function renderMarks() {
+      const stuFilter = document.getElementById('marks-student-filter').value;
+      const subFilter = document.getElementById('marks-subject-filter').value;
+
+      const filtered = state.marks.filter(m => {
+        const matchStu = !stuFilter || m.studentId === stuFilter;
+        const matchSub = !subFilter || m.subject === subFilter;
+        return matchStu && matchSub;
+      });
+
+      const container = document.getElementById('marks-list');
+      if (!filtered.length) {
+        container.innerHTML = '<div class="card empty-state">No exam marks found. Tap "+ Add Marks" to record scores.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(m => {
+        const stu = state.students.find(s => s.id === m.studentId);
+        const pct = ((m.obtained / m.max) * 100).toFixed(1);
+        const badgeClass = pct >= 75 ? 'badge-green' : (pct >= 45 ? 'badge-gold' : 'badge-red');
+        return `
+          <div class="student-item">
+            <div class="student-top">
+              <div>
+                <div class="student-name">${esc(stu ? stu.name : 'Unknown Student')}</div>
+                <div class="student-meta">
+                  <strong>${esc(m.examTitle)}</strong> • ${esc(m.subject)}<br/>
+                  Date: ${esc(m.date)}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div style="font-size:16px; font-weight:800; color:var(--royal-900);">${m.obtained} / ${m.max}</div>
+                <span class="badge ${badgeClass}">${pct}%</span>
+              </div>
+            </div>
+            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+              <button class="btn btn-danger btn-sm" onclick="deleteExamMark('${esc(m.id)}')">Delete</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ==========================================================================
+       8. FEES MANAGEMENT
+       ========================================================================== */
+    function switchFeeSubtab(sub) {
+      document.getElementById('fee-tab-balances').classList.toggle('active', sub === 'balances');
+      document.getElementById('fee-tab-history').classList.toggle('active', sub === 'history');
+      document.getElementById('fee-balances-view').style.display = sub === 'balances' ? 'block' : 'none';
+      document.getElementById('fee-history-view').style.display = sub === 'history' ? 'block' : 'none';
+      renderFees();
+    }
+
+    function openFeePaymentModal(preselectStudentId = null) {
+      if (!state.students.length) {
+        alert('Please add a student first before recording fee payments.');
+        return;
+      }
+      document.getElementById('form-fee').reset();
+      document.getElementById('fee-date').value = todayStr();
+      populateBatchAndStudentDropdowns();
+      if (preselectStudentId) {
+        document.getElementById('fee-student').value = preselectStudentId;
+      }
+      updateFeeModalHint();
+      openModal('modal-fee');
+    }
+
+    function updateFeeModalHint() {
+      const stuId = document.getElementById('fee-student').value;
+      const stu = state.students.find(s => s.id === stuId);
+      const hint = document.getElementById('fee-balance-hint');
+      if (!stu) {
+        hint.textContent = '';
+        return;
+      }
+      const paid = state.fees.filter(f => f.studentId === stu.id).reduce((sum, f) => sum + Number(f.amount), 0);
+      const due = Math.max(0, Number(stu.totalFee) - paid);
+      hint.textContent = `Total Fee: ${formatINR(stu.totalFee)} | Paid: ${formatINR(paid)} | Balance Due: ${formatINR(due)}`;
+    }
+
+    async function saveFeePayment(e) {
+      e.preventDefault();
+      const amount = Number(document.getElementById('fee-amount').value);
+      if (amount <= 0) {
+        alert('Enter a valid payment amount.');
+        return;
+      }
+
+      const payment = {
+        id: uid('fee'),
+        studentId: document.getElementById('fee-student').value,
+        amount,
+        date: document.getElementById('fee-date').value,
+        mode: document.getElementById('fee-mode').value,
+        note: document.getElementById('fee-note').value.trim()
+      };
+
+      await dbPut('fees', payment);
+      await loadAllState();
+      closeModal('modal-fee');
+      refreshAllViews();
+      showToast(`Receipt of ${formatINR(amount)} saved`);
+    }
+
+    async function deleteFeePayment(id) {
+      if (!confirm('Delete this fee payment receipt?')) return;
+      await dbDelete('fees', id);
+      await loadAllState();
+      refreshAllViews();
+      showToast('Fee receipt deleted');
+    }
+
+    function renderFees() {
+      const q = document.getElementById('fee-search').value.trim().toLowerCase();
+      const list = state.students.filter(s => !q || s.name.toLowerCase().includes(q) || s.batch.toLowerCase().includes(q));
+
+      const balancesContainer = document.getElementById('fee-student-cards');
+      if (!list.length) {
+        balancesContainer.innerHTML = '<div class="card empty-state">No students found.</div>';
+      } else {
+        balancesContainer.innerHTML = list.map(s => {
+          const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
+          const total = Number(s.totalFee || 0);
+          const due = Math.max(0, total - paid);
+          const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 100;
+          return `
+            <div class="student-item">
+              <div class="student-top">
+                <div>
+                  <div class="student-name">${esc(s.name)}</div>
+                  <div class="student-meta">${esc(s.class)} • ${esc(s.batch)}</div>
+                </div>
+                <span class="badge ${due === 0 ? 'badge-green' : 'badge-red'}">
+                  ${due === 0 ? 'Cleared' : 'Due: ' + formatINR(due)}
+                </span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:10px; font-weight:700;">
+                <span>Paid: ${formatINR(paid)}</span>
+                <span>Total: ${formatINR(total)}</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width:${pct}%; background:${due === 0 ? 'var(--green)' : 'var(--gold-500)'};"></div>
+              </div>
+              <div style="margin-top:10px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-primary btn-sm" onclick="openFeePaymentModal('${esc(s.id)}')">+ Record Payment</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const historyContainer = document.getElementById('fee-payments-list');
+      if (!state.fees.length) {
+        historyContainer.innerHTML = '<div class="card empty-state">No fee transactions recorded yet.</div>';
+      } else {
+        historyContainer.innerHTML = state.fees.map(f => {
+          const stu = state.students.find(s => s.id === f.studentId);
+          return `
+            <div class="student-item">
+              <div class="student-top">
+                <div>
+                  <div class="student-name">${esc(stu ? stu.name : 'Unknown Student')}</div>
+                  <div class="student-meta">Date: ${esc(f.date)} • Mode: ${esc(f.mode)} ${f.note ? '• ' + esc(f.note) : ''}</div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:16px; font-weight:800; color:var(--green);">${formatINR(f.amount)}</div>
+                </div>
+              </div>
+              <div style="margin-top:8px; display:flex; justify-content:flex-end;">
+                <button class="btn btn-danger btn-sm" onclick="deleteFeePayment('${esc(f.id)}')">Delete Receipt</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    /* ==========================================================================
+       9. REPORTS (CSV EXPORT) & JSON BACKUP / RESTORE
+       ========================================================================== */
+    function renderReportPreview() {
+      const container = document.getElementById('batch-report-preview');
+      if (!state.students.length) {
+        container.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">Add students to view batch analytics.</div>';
+        return;
+      }
+
+      const batches = [...new Set(state.students.map(s => s.batch))].sort();
+      const rows = batches.map(b => {
+        const bStudents = state.students.filter(s => s.batch === b);
+        const ids = new Set(bStudents.map(s => s.id));
+        const totalFee = bStudents.reduce((s, x) => s + Number(x.totalFee || 0), 0);
+        const paidFee = state.fees.filter(f => ids.has(f.studentId)).reduce((s, f) => s + Number(f.amount || 0), 0);
+        const dueFee = Math.max(0, totalFee - paidFee);
+        return `
+          <tr>
+            <td><strong>${esc(b)}</strong></td>
+            <td>${bStudents.length}</td>
+            <td style="color:var(--green); font-weight:700;">${formatINR(paidFee)}</td>
+            <td style="color:var(--red); font-weight:700;">${formatINR(dueFee)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Batch</th><th>Students</th><th>Collected</th><th>Pending</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function downloadFile(filename, content, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function toCSVRow(arr) {
+      return arr.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
+    }
+
+    function exportBatchCSV() {
+      const batch = document.getElementById('report-batch-select').value;
+      const list = state.students.filter(s => !batch || s.batch === batch);
+      if (!list.length) {
+        alert('No student records to export.');
+        return;
+      }
+
+      const headers = [
+        'Student ID', 'Name', 'Phone', 'Class', 'Batch', 'Subjects',
+        'Guardian Name', 'Guardian Phone', 'Admission Date',
+        'Classes Present', 'Total Classes Marked', 'Attendance %',
+        'Average Exam %', 'Total Fee (INR)', 'Paid Fee (INR)', 'Pending Fee (INR)'
+      ];
+
+      const lines = [toCSVRow(headers)];
+      list.forEach(s => {
+        const atts = state.attendance.filter(a => a.studentId === s.id);
+        const present = atts.filter(a => a.status === 'P').length;
+        const attPct = atts.length ? ((present / atts.length) * 100).toFixed(1) + '%' : '0%';
+
+        const stuMarks = state.marks.filter(m => m.studentId === s.id);
+        const avgPct = stuMarks.length
+          ? (stuMarks.reduce((acc, m) => acc + (m.obtained / m.max) * 100, 0) / stuMarks.length).toFixed(1) + '%'
+          : 'N/A';
+
+        const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
+        const due = Math.max(0, Number(s.totalFee) - paid);
+
+        lines.push(toCSVRow([
+          s.id, s.name, s.phone, s.class, s.batch, (s.subjects || []).join('; '),
+          s.guardianName, s.guardianPhone, s.admissionDate,
+          present, atts.length, attPct,
+          avgPct, s.totalFee, paid, due
+        ]));
+      });
+
+      const fileLabel = batch ? batch.replace(/\s+/g, '_') : 'All_Batches';
+      downloadFile(`CommerceEdge_${fileLabel}_${todayStr()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8;');
+      showToast('Batch CSV exported');
+    }
+
+    function exportStudentCSV() {
+      const stuId = document.getElementById('report-student-select').value;
+      const s = state.students.find(x => x.id === stuId);
+      if (!s) {
+        alert('Please select a student.');
+        return;
+      }
+
+      const lines = [];
+      lines.push(toCSVRow(['COMMERCE EDGE ADMIN - STUDENT REPORT']));
+      lines.push(toCSVRow(['Name', s.name, 'Class', s.class, 'Batch', s.batch]));
+      lines.push(toCSVRow(['Phone', s.phone, 'Guardian', s.guardianName, 'Guardian Phone', s.guardianPhone]));
+      lines.push(toCSVRow(['Subjects', (s.subjects || []).join('; '), 'Admission Date', s.admissionDate]));
+      lines.push('');
+
+      lines.push(toCSVRow(['ATTENDANCE HISTORY']));
+      lines.push(toCSVRow(['Date', 'Status']));
+      state.attendance.filter(a => a.studentId === s.id).forEach(a => {
+        lines.push(toCSVRow([a.date, a.status]));
+      });
+      lines.push('');
+
+      lines.push(toCSVRow(['EXAMINATION MARKS']));
+      lines.push(toCSVRow(['Date', 'Exam', 'Subject', 'Obtained', 'Maximum', 'Percentage']));
+      state.marks.filter(m => m.studentId === s.id).forEach(m => {
+        lines.push(toCSVRow([m.date, m.examTitle, m.subject, m.obtained, m.max, ((m.obtained / m.max) * 100).toFixed(1) + '%']));
+      });
+      lines.push('');
+
+      lines.push(toCSVRow(['FEE LEDGER']));
+      lines.push(toCSVRow(['Date', 'Amount (INR)', 'Mode', 'Note']));
+      state.fees.filter(f => f.studentId === s.id).forEach(f => {
+        lines.push(toCSVRow([f.date, f.amount, f.mode, f.note]));
+      });
+
+      downloadFile(`CommerceEdge_${s.name.replace(/\s+/g, '_')}_${todayStr()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8;');
+      showToast('Student CSV exported');
+    }
+
+    function exportJSONBackup() {
+      const backup = {
+        app: 'COMMERCE EDGE ADMIN',
+        exportedAt: new Date().toISOString(),
+        version: 1,
+        data: state
+      };
+      downloadFile(`CommerceEdge_Backup_${todayStr()}.json`, JSON.stringify(backup, null, 2), 'application/json');
+      showToast('JSON Backup downloaded');
+    }
+
+    function restoreJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          const payload = parsed.data || parsed;
+          if (!Array.isArray(payload.students) || !Array.isArray(payload.attendance) ||
+              !Array.isArray(payload.marks) || !Array.isArray(payload.fees)) {
+            throw new Error('Invalid backup structure');
+          }
+          if (!confirm(`Restore backup containing ${payload.students.length} students? Current data will be replaced.`)) {
+            return;
+          }
+
+          await Promise.all([
+            dbClear('students'),
+            dbClear('attendance'),
+            dbClear('marks'),
+            dbClear('fees')
+          ]);
+
+          for (const s of payload.students) await dbPut('students', s);
+          for (const a of payload.attendance) await dbPut('attendance', a);
+          for (const m of payload.marks) await dbPut('marks', m);
+          for (const f of payload.fees) await dbPut('fees', f);
+
+          await loadAllState();
+          refreshAllViews();
+          showToast('Backup restored successfully');
+        } catch (err) {
+          alert('Failed to restore backup: Invalid JSON file.');
+        } finally {
+          event.target.value = '';
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    async function seedDemoData() {
+      if (state.students.length > 0 && !confirm('Add sample students and records alongside existing data?')) {
+        return;
+      }
+      const t = todayStr();
+      const s1 = {
+        id: 'stu_demo_1', name: 'Aarav Kalita', phone: '9864011223', admissionDate: '2026-08-10',
+        class: 'Class 12', batch: 'Morning XII-A', subjects: ['Accountancy', 'Business Studies', 'Economics'],
+        guardianName: 'Pranab Kalita', guardianPhone: '9435011223', totalFee: 14000
+      };
+      const s2 = {
+        id: 'stu_demo_2', name: 'Priya Das', phone: '9864044556', admissionDate: '2026-08-12',
+        class: 'Class 12', batch: 'Morning XII-A', subjects: ['Accountancy', 'Finance', 'English'],
+        guardianName: 'Subrata Das', guardianPhone: '9435044556', totalFee: 14000
+      };
+      const s3 = {
+        id: 'stu_demo_3', name: 'Rohan Sharma', phone: '9864077889', admissionDate: '2026-09-01',
+        class: 'Class 11', batch: 'Evening XI-A', subjects: ['Accountancy', 'Business Studies', 'Economics', 'Finance'],
+        guardianName: 'Mahesh Sharma', guardianPhone: '9435077889', totalFee: 12000
+      };
+
+      for (const s of [s1, s2, s3]) await dbPut('students', s);
+      await dbPut('attendance', { id: `${t}_${s1.id}`, date: t, studentId: s1.id, status: 'P' });
+      await dbPut('attendance', { id: `${t}_${s2.id}`, date: t, studentId: s2.id, status: 'P' });
+      await dbPut('attendance', { id: `${t}_${s3.id}`, date: t, studentId: s3.id, status: 'L' });
+
+      await dbPut('marks', {
+        id: 'mark_demo_1', studentId: s1.id, examTitle: 'Unit Test 1',
+        date: t, subject: 'Accountancy', obtained: 86, max: 100
+      });
+      await dbPut('marks', {
+        id: 'mark_demo_2', studentId: s2.id, examTitle: 'Unit Test 1',
+        date: t, subject: 'Finance', obtained: 91, max: 100
+      });
+
+      await dbPut('fees', {
+        id: 'fee_demo_1', studentId: s1.id, amount: 7000, date: t, mode: 'UPI', note: '1st Installment'
+      });
+      await dbPut('fees', {
+        id: 'fee_demo_2', studentId: s2.id, amount: 14000, date: t, mode: 'Cash', note: 'Full Annual Fee'
+      });
+
+      await loadAllState();
+      refreshAllViews();
+      showToast('Sample data loaded');
+    }
+
+    async function clearAllDatabase() {
+      if (!confirm('Are you sure you want to permanently delete ALL students, attendance, marks, and fee records?')) {
+        return;
+      }
+      await Promise.all([
+        dbClear('students'),
+        dbClear('attendance'),
+        dbClear('marks'),
+        dbClear('fees')
+      ]);
+      await loadAllState();
+      refreshAllViews();
+      showToast('All records cleared');
+    }
+
+    /* ==========================================================================
+       10. APP BOOTSTRAP
+       ========================================================================== */
+    function refreshAllViews() {
+      populateBatchAndStudentDropdowns();
+      renderDashboard();
+      renderStudents();
+      renderDailyAttendance();
+      renderMonthlyAttendance();
+      renderMarks();
+      renderFees();
+      renderReportPreview();
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      await openDatabase();
+      await loadAllState();
+      document.getElementById('att-date').value = todayStr();
+      document.getElementById('att-month').value = currentMonthStr();
+      refreshAllViews();
+    });
+  </script>
+<script>if(location.protocol.startsWith('http')&&'serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(console.error);}</script>
+</body>
+</html>

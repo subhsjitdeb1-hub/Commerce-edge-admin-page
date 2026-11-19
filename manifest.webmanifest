@@ -1,0 +1,9 @@
+{
+  "name":"Commerce Edge Admin",
+  "short_name":"Commerce Edge",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#0F2A6B",
+  "theme_color":"#0F2A6B",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml"}]
+}
