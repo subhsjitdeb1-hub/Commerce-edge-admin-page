@@ -116,6 +116,7 @@
       align-items: center;
       gap: 5px;
       border: 1px solid rgba(255, 255, 255, 0.18);
+      cursor: pointer;
     }
 
     .status-dot {
@@ -694,7 +695,7 @@
         <div class="brand-sub">Odalbakra, Guwahati • Single Admin</div>
       </div>
     </div>
-    <div class="status-pill" id="network-status">
+    <div class="status-pill" id="network-status" onclick="manualCloudSync()" title="Tap to Sync Now">
       <span class="status-dot" id="status-dot"></span>
       <span id="status-text">Offline Ready</span>
     </div>
@@ -894,6 +895,16 @@
     <section id="screen-more" class="screen">
       <div class="section-head">
         <h1 class="section-title">Reports & Backup</h1>
+      </div>
+
+      <!-- Cloud Sync Controls -->
+      <div class="card">
+        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Google Sheets Cloud Sync</div>
+        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;" id="cloud-sync-info">Auto-syncs whenever you save records online.</div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="pullFromCloud(true)">⬇ Pull from Cloud</button>
+          <button class="btn btn-gold btn-sm" style="flex:1;" onclick="pushToCloud(true)">⬆ Push to Cloud</button>
+        </div>
       </div>
 
       <!-- CSV Reports -->
@@ -1168,10 +1179,24 @@
 
   <script>
     /* ==========================================================================
+       0. GOOGLE SHEETS CLOUD SYNC CONFIGURATION
+       ========================================================================== */
+    const SYNC_URL = "PASTE_YOUR_EXEC_URL_HERE";
+    const SYNC_TOKEN = "CE_ADMIN_2026";
+    const PENDING_SYNC_KEY = "ce_pending_cloud_push";
+
+    function setSyncStatus(label, isOffline = false) {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      if (!dot || !txt) return;
+      dot.classList.toggle('offline', isOffline);
+      txt.textContent = label;
+    }
+
+    /* ==========================================================================
        1. LOCAL APP ICON & CONNECTION STATUS
        ========================================================================== */
     (function setupPWA() {
-      // Generate PNG Icon dynamically via Canvas for iOS Home Screen
       const iconCanvas = document.createElement('canvas');
       iconCanvas.width = 512;
       iconCanvas.height = 512;
@@ -1190,16 +1215,14 @@
       const iconDataUrl = iconCanvas.toDataURL('image/png');
       document.getElementById('apple-icon').href = iconDataUrl;
 
-      // Online/Offline indicator
       function updateOnlineStatus() {
-        const dot = document.getElementById('status-dot');
-        const txt = document.getElementById('status-text');
         if (navigator.onLine) {
-          dot.classList.remove('offline');
-          txt.textContent = 'Local Storage Active';
+          setSyncStatus('Online Ready', false);
+          if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
+            pushToCloud(false);
+          }
         } else {
-          dot.classList.add('offline');
-          txt.textContent = 'Offline Mode';
+          setSyncStatus('Offline Mode', true);
         }
       }
       window.addEventListener('online', updateOnlineStatus);
@@ -1208,7 +1231,7 @@
     })();
 
     /* ==========================================================================
-       2. INDEXEDDB STORAGE ENGINE
+       2. INDEXEDDB STORAGE ENGINE & CLOUD SYNC BRIDGE
        ========================================================================== */
     const DB_NAME = 'CommerceEdgeAdminDB';
     const DB_VERSION = 1;
@@ -1216,9 +1239,9 @@
 
     let state = {
       students: [],
-      attendance: [], // { id: "date_studentId", date: "YYYY-MM-DD", studentId: "...", status: "P"|"A"|"L" }
-      marks: [],      // { id, studentId, examTitle, date, subject, obtained, max }
-      fees: []        // { id, studentId, amount, date, mode, note }
+      attendance: [],
+      marks: [],
+      fees: []
     };
 
     function openDatabase() {
@@ -1298,6 +1321,137 @@
       state.attendance = attendance;
       state.marks = marks.sort((a, b) => b.date.localeCompare(a.date));
       state.fees = fees.sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function normalizeSheetRecords(records, type) {
+      if (!Array.isArray(records)) return [];
+      return records
+        .filter(r => r && r.id)
+        .map(r => {
+          const item = { ...r, id: String(r.id) };
+          if (type === 'students') {
+            if (typeof item.subjects === 'string') {
+              item.subjects = item.subjects.split(',').map(s => s.trim()).filter(Boolean);
+            } else if (!Array.isArray(item.subjects)) {
+              item.subjects = [];
+            }
+            item.totalFee = Number(item.totalFee || 0);
+            item.phone = String(item.phone || '');
+            item.guardianPhone = String(item.guardianPhone || '');
+            item.admissionDate = String(item.admissionDate || '').slice(0, 10);
+          } else if (type === 'attendance') {
+            item.studentId = String(item.studentId || '');
+            item.date = String(item.date || '').slice(0, 10);
+          } else if (type === 'marks') {
+            item.studentId = String(item.studentId || '');
+            item.date = String(item.date || '').slice(0, 10);
+            item.obtained = Number(item.obtained || 0);
+            item.max = Number(item.max || 100);
+          } else if (type === 'fees') {
+            item.studentId = String(item.studentId || '');
+            item.date = String(item.date || '').slice(0, 10);
+            item.amount = Number(item.amount || 0);
+          }
+          return item;
+        });
+    }
+
+    async function pullFromCloud(notify = false) {
+      if (!SYNC_URL || !SYNC_URL.startsWith('http')) return;
+      if (!navigator.onLine) {
+        setSyncStatus('Offline Mode', true);
+        if (notify) showToast('Offline: using local data');
+        return;
+      }
+      // If local changes failed to push while offline, push them before pulling
+      if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
+        await pushToCloud(false);
+        return;
+      }
+      try {
+        setSyncStatus('Syncing...', false);
+        const res = await fetch(`${SYNC_URL}?token=${encodeURIComponent(SYNC_TOKEN)}`);
+        const json = await res.json();
+        if (!json.ok) {
+          setSyncStatus('Sync Auth Error', true);
+          if (notify) showToast('Sync failed: ' + (json.error || 'Auth error'));
+          return;
+        }
+
+        const cloudStudents = normalizeSheetRecords(json.students, 'students');
+        const cloudAttendance = normalizeSheetRecords(json.attendance, 'attendance');
+        const cloudMarks = normalizeSheetRecords(json.marks, 'marks');
+        const cloudFees = normalizeSheetRecords(json.fees, 'fees');
+
+        await Promise.all([
+          dbClear('students'),
+          dbClear('attendance'),
+          dbClear('marks'),
+          dbClear('fees')
+        ]);
+
+        for (const s of cloudStudents) await dbPut('students', s);
+        for (const a of cloudAttendance) await dbPut('attendance', a);
+        for (const m of cloudMarks) await dbPut('marks', m);
+        for (const f of cloudFees) await dbPut('fees', f);
+
+        await loadAllState();
+        refreshAllViews();
+        setSyncStatus('Cloud Synced', false);
+        const info = document.getElementById('cloud-sync-info');
+        if (info) info.textContent = `Last synced: ${new Date().toLocaleTimeString()}`;
+        if (notify) showToast('Pulled latest records from Google Sheets');
+      } catch (err) {
+        console.warn('Cloud pull error:', err);
+        setSyncStatus('Local Storage Active', true);
+        if (notify) showToast('Could not reach Google Sheets');
+      }
+    }
+
+    async function pushToCloud(notify = false) {
+      if (!SYNC_URL || !SYNC_URL.startsWith('http')) return;
+      if (!navigator.onLine) {
+        localStorage.setItem(PENDING_SYNC_KEY, '1');
+        setSyncStatus('Pending Sync', true);
+        if (notify) showToast('Offline: queued for sync');
+        return;
+      }
+      try {
+        setSyncStatus('Syncing...', false);
+        const res = await fetch(SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            token: SYNC_TOKEN,
+            data: state
+          })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          localStorage.removeItem(PENDING_SYNC_KEY);
+          setSyncStatus('Cloud Synced', false);
+          const info = document.getElementById('cloud-sync-info');
+          if (info) info.textContent = `Last synced: ${new Date().toLocaleTimeString()}`;
+          if (notify) showToast('Pushed all records to Google Sheets');
+        } else {
+          localStorage.setItem(PENDING_SYNC_KEY, '1');
+          setSyncStatus('Sync Error', true);
+          if (notify) showToast('Sync error: ' + (json.error || 'Unknown'));
+        }
+      } catch (err) {
+        console.warn('Cloud push error:', err);
+        localStorage.setItem(PENDING_SYNC_KEY, '1');
+        setSyncStatus('Pending Sync', true);
+        if (notify) showToast('Saved locally; will sync when online');
+      }
+    }
+
+    function manualCloudSync() {
+      if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
+        pushToCloud(true);
+      } else {
+        pullFromCloud(true);
+      }
     }
 
     /* ==========================================================================
@@ -1398,7 +1552,6 @@
       document.getElementById('kpi-students').textContent = totalStudents;
       document.getElementById('kpi-batches-sub').textContent = `${uniqueBatches} Active Batch${uniqueBatches === 1 ? '' : 'es'}`;
 
-      // Today's attendance
       const todayAtt = state.attendance.filter(a => a.date === today);
       const presentCount = todayAtt.filter(a => a.status === 'P').length;
       const markedCount = todayAtt.length;
@@ -1406,7 +1559,6 @@
       document.getElementById('kpi-attendance').textContent = `${attPct}%`;
       document.getElementById('kpi-att-sub').textContent = `${presentCount} Present / ${markedCount} Marked`;
 
-      // Monthly collections & total pending
       const monthCollected = state.fees
         .filter(f => f.date.startsWith(month))
         .reduce((sum, f) => sum + Number(f.amount || 0), 0);
@@ -1426,7 +1578,6 @@
       document.getElementById('kpi-pending').textContent = formatINR(totalPending);
       document.getElementById('kpi-defaulters-sub').textContent = `${defaulters} Student${defaulters === 1 ? '' : 's'} Due`;
 
-      // Batch breakdown
       const batchMap = {};
       state.students.forEach(s => {
         batchMap[s.batch] = (batchMap[s.batch] || 0) + 1;
@@ -1450,7 +1601,6 @@
         }).join('');
       }
 
-      // Recent fees
       const recentContainer = document.getElementById('dash-recent-fees');
       const recentFees = state.fees.slice(0, 4);
       if (!recentFees.length) {
@@ -1532,6 +1682,7 @@
       closeModal('modal-student');
       refreshAllViews();
       showToast('Student record saved');
+      pushToCloud(false);
     }
 
     async function deleteStudent(id) {
@@ -1552,6 +1703,7 @@
       await loadAllState();
       refreshAllViews();
       showToast('Student deleted');
+      pushToCloud(false);
     }
 
     function renderStudents() {
@@ -1668,7 +1820,7 @@
     /* ==========================================================================
        6. ATTENDANCE MANAGEMENT (DAILY P/A/L & MONTHLY REPORT)
        ========================================================================== */
-    let draftAttendance = {}; // { studentId: 'P'|'A'|'L' }
+    let draftAttendance = {};
 
     function switchAttSubtab(sub) {
       document.getElementById('att-tab-daily').classList.toggle('active', sub === 'daily');
@@ -1693,7 +1845,6 @@
         return;
       }
 
-      // Sync draftAttendance with saved DB records for the chosen date
       draftAttendance = {};
       list.forEach(s => {
         const existing = state.attendance.find(a => a.date === dateVal && a.studentId === s.id);
@@ -1757,6 +1908,7 @@
       await loadAllState();
       renderDashboard();
       showToast(`Attendance saved for ${dateVal}`);
+      pushToCloud(false);
     }
 
     function renderMonthlyAttendance() {
@@ -1842,6 +1994,7 @@
       closeModal('modal-exam');
       renderMarks();
       showToast('Exam marks added');
+      pushToCloud(false);
     }
 
     async function deleteExamMark(id) {
@@ -1850,6 +2003,7 @@
       await loadAllState();
       renderMarks();
       showToast('Exam record deleted');
+      pushToCloud(false);
     }
 
     function renderMarks() {
@@ -1956,6 +2110,7 @@
       closeModal('modal-fee');
       refreshAllViews();
       showToast(`Receipt of ${formatINR(amount)} saved`);
+      pushToCloud(false);
     }
 
     async function deleteFeePayment(id) {
@@ -1964,6 +2119,7 @@
       await loadAllState();
       refreshAllViews();
       showToast('Fee receipt deleted');
+      pushToCloud(false);
     }
 
     function renderFees() {
@@ -2207,6 +2363,7 @@
           await loadAllState();
           refreshAllViews();
           showToast('Backup restored successfully');
+          pushToCloud(false);
         } catch (err) {
           alert('Failed to restore backup: Invalid JSON file.');
         } finally {
@@ -2261,6 +2418,7 @@
       await loadAllState();
       refreshAllViews();
       showToast('Sample data loaded');
+      pushToCloud(false);
     }
 
     async function clearAllDatabase() {
@@ -2276,6 +2434,7 @@
       await loadAllState();
       refreshAllViews();
       showToast('All records cleared');
+      pushToCloud(false);
     }
 
     /* ==========================================================================
@@ -2298,6 +2457,7 @@
       document.getElementById('att-date').value = todayStr();
       document.getElementById('att-month').value = currentMonthStr();
       refreshAllViews();
+      await pullFromCloud(false);
     });
   </script>
 <script>if(location.protocol.startsWith('http')&&'serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(console.error);}</script>
