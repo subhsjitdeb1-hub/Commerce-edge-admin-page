@@ -1181,7 +1181,7 @@
     /* ==========================================================================
        0. GOOGLE SHEETS CLOUD SYNC CONFIGURATION
        ========================================================================== */
-    const SYNC_URL = "PASTE_YOUR_EXEC_URL_HERE";
+    const SYNC_URL = "https://script.google.com/macros/s/AKfycbwUyxjWYtC38y6Hrys5mjMmZs3Q4y3qIP2X4-KPe2yxGY6W_qBHkc2uFcp5YO0M83WQ/exec";
     const SYNC_TOKEN = "CE_ADMIN_2026";
     const PENDING_SYNC_KEY = "ce_pending_cloud_push";
 
@@ -1363,7 +1363,6 @@
         if (notify) showToast('Offline: using local data');
         return;
       }
-      // If local changes failed to push while offline, push them before pulling
       if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
         await pushToCloud(false);
         return;
