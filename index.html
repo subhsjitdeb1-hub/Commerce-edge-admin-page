@@ -151,7 +151,9 @@
   }
   .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
   .item-name { font-weight: 800; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .name-link { color: var(--navy); text-decoration: underline; text-decoration-color: #cbd5e1; cursor: pointer; }
   .item-meta { font-size: 12px; color: var(--muted); }
+  .stats-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
   .badge {
     font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
     display: inline-block; white-space: nowrap;
@@ -159,7 +161,19 @@
   .badge-ok { background: var(--ok-bg); color: var(--ok); }
   .badge-warn { background: var(--warn-bg); color: var(--warn); }
   .badge-err { background: var(--err-bg); color: var(--err); }
+  .badge-neutral { background: #f1f5f9; color: #334155; }
   .actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .analytics-stat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 12px;
+  }
+  .mini-stat {
+    background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+  }
+  .mini-stat-label { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .mini-stat-val { font-size: 17px; font-weight: 800; margin-top: 2px; }
+  .sub-block-title { font-size: 12px; font-weight: 800; color: #334155; margin: 10px 0 6px; }
+  .mini-log { font-size: 12px; padding: 7px 9px; border-radius: 8px; background: #f8fafc; margin-bottom: 6px; display: flex; justify-content: space-between; gap: 8px; }
 
   nav.bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0;
@@ -190,7 +204,7 @@
   .modal-backdrop.open { display: flex; }
   .modal-box {
     background: #fff; border-radius: 16px; padding: 16px;
-    width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+    width: 100%; max-width: 500px; max-height: 88vh; overflow-y: auto;
     box-shadow: 0 20px 45px rgba(0,0,0,0.25);
   }
   .hidden { display: none !important; }
@@ -259,6 +273,11 @@
       <div class="card-title">Class & Tuition Breakdown</div>
       <div id="classSummaryBox" class="item-meta">No students added yet.</div>
     </div>
+
+    <div class="card">
+      <div class="card-title">Needs Attention (Analytics Alerts)</div>
+      <div id="attentionBox" class="item-meta">All tracked students look good right now.</div>
+    </div>
   </section>
 
   <!-- STUDENTS TAB -->
@@ -269,7 +288,7 @@
     </div>
 
     <div class="filter-bar">
-      <input id="studentSearch" type="search" placeholder="Search name or phone..." oninput="renderStudents()" />
+      <input id="studentSearch" type="search" placeholder="Search student, parent or phone..." oninput="renderStudents()" />
       <select id="studentTypeFilter" onchange="renderStudents()">
         <option value="ALL">All Types (Batch + Personal)</option>
         <option value="Coaching Batch">Coaching Batch</option>
@@ -295,8 +314,20 @@
             <input id="stuName" required placeholder="e.g., Ananya Das" />
           </div>
           <div>
-            <label>Guardian / WhatsApp Number (10 digits) *</label>
-            <input id="stuPhone" required pattern="[0-9]{10}" maxlength="10" placeholder="9876543210" />
+            <label>Student Phone (10 digits)</label>
+            <input id="stuPhone" pattern="[0-9]{10}" maxlength="10" placeholder="Optional student number" />
+          </div>
+          <div>
+            <label>Parent / Guardian Name *</label>
+            <input id="stuParentName" required placeholder="e.g., Mr. Rajesh Das" />
+          </div>
+          <div>
+            <label>Parent / Guardian WhatsApp Number *</label>
+            <input id="stuParentPhone" required pattern="[0-9]{10}" maxlength="10" placeholder="9876543210" />
+          </div>
+          <div>
+            <label>Date of Admission *</label>
+            <input id="stuAdmissionDate" type="date" required />
           </div>
           <div>
             <label>Tuition Type *</label>
@@ -319,13 +350,9 @@
             <label>Monthly Fee (₹) *</label>
             <input id="stuMonthlyFee" type="number" min="0" required placeholder="1200" />
           </div>
-          <div>
+          <div style="grid-column: 1 / -1;">
             <label>Pending / Opening Balance (₹)</label>
             <input id="stuDue" type="number" min="0" value="0" />
-          </div>
-          <div style="grid-column: 1 / -1;">
-            <label>Timing / Location Note</label>
-            <input id="stuBatch" placeholder="e.g., Evening 4:30 PM or Home Visit - Beltola" />
           </div>
         </div>
 
@@ -492,6 +519,21 @@
   </section>
 </main>
 
+<!-- STUDENT ANALYTICS MODAL -->
+<div id="studentAnalyticsModal" class="modal-backdrop" onclick="if(event.target===this) closeStudentAnalytics()">
+  <div class="modal-box">
+    <div class="item-top">
+      <div>
+        <div class="card-title" id="saName" style="margin:0;">Student Analytics</div>
+        <div class="item-meta" id="saSubMeta"></div>
+      </div>
+      <button class="btn btn-soft btn-sm" type="button" onclick="closeStudentAnalytics()">✕</button>
+    </div>
+    <div id="saBody" style="margin-top:8px;"></div>
+    <div class="actions-row" id="saActions" style="margin-top:12px;"></div>
+  </div>
+</div>
+
 <!-- WHATSAPP MODAL -->
 <div id="waModal" class="modal-backdrop" onclick="if(event.target===this) closeWaModal()">
   <div class="modal-box">
@@ -616,11 +658,52 @@ function dbGetAll(storeName) {
 async function loadFromIDB() {
   state.students = (await dbGetAll("students")).map((s) => ({
     ...s,
-    tuitionType: s.tuitionType || "Coaching Batch"
+    tuitionType: s.tuitionType || "Coaching Batch",
+    parentName: s.parentName || "",
+    parentPhone: s.parentPhone || s.phone || "",
+    admissionDate: s.admissionDate || ""
   }));
   state.attendance = await dbGetAll("attendance");
   state.marks = await dbGetAll("marks");
   state.fees = await dbGetAll("fees");
+}
+
+function getStudentAnalytics(studentId) {
+  const attRows = state.attendance.filter((a) => a.studentId === studentId);
+  const totalSessions = attRows.length;
+  const presentSessions = attRows.filter((a) => a.status === "Present").length;
+  const attPct = totalSessions ? Math.round((presentSessions / totalSessions) * 100) : null;
+
+  const stuMarks = state.marks
+    .filter((m) => m.studentId === studentId && Number(m.maxScore) > 0)
+    .sort((a, b) => String(a.date || "").localeCompare(String(b.date || "")) || String(a.id).localeCompare(String(b.id)));
+
+  const pcts = stuMarks.map((m) => (Number(m.score) / Number(m.maxScore)) * 100);
+  const avgPct = pcts.length ? Math.round(pcts.reduce((sum, v) => sum + v, 0) / pcts.length) : null;
+
+  let trend = "none";
+  let trendDelta = 0;
+  if (pcts.length >= 2) {
+    const latest = pcts[pcts.length - 1];
+    const prev = pcts[pcts.length - 2];
+    trendDelta = Math.round(latest - prev);
+    if (trendDelta > 1) trend = "up";
+    else if (trendDelta < -1) trend = "down";
+    else trend = "flat";
+  }
+
+  const feeRows = state.fees.filter((f) => f.studentId === studentId);
+  return {
+    totalSessions,
+    presentSessions,
+    attPct,
+    avgPct,
+    trend,
+    trendDelta,
+    examCount: stuMarks.length,
+    recentMarks: stuMarks.slice().reverse(),
+    recentFees: feeRows.slice().reverse()
+  };
 }
 
 function switchTab(tabName) {
@@ -662,12 +745,14 @@ function openAddStudentForm(student = null) {
   document.getElementById("studentFormTitle").textContent = student ? "Edit Student" : "Add New Student";
   document.getElementById("stuId").value = student ? student.id : "";
   document.getElementById("stuName").value = student ? student.name : "";
-  document.getElementById("stuPhone").value = student ? student.phone : "";
+  document.getElementById("stuPhone").value = student ? (student.phone || "") : "";
+  document.getElementById("stuParentName").value = student ? (student.parentName || "") : "";
+  document.getElementById("stuParentPhone").value = student ? (student.parentPhone || student.phone || "") : "";
+  document.getElementById("stuAdmissionDate").value = student ? (student.admissionDate || todayISO()) : todayISO();
   document.getElementById("stuType").value = student ? (student.tuitionType || "Coaching Batch") : "Coaching Batch";
   document.getElementById("stuClass").value = student ? student.className : "Class 10";
   document.getElementById("stuMonthlyFee").value = student ? student.monthlyFee : "";
   document.getElementById("stuDue").value = student ? student.dueAmount : 0;
-  document.getElementById("stuBatch").value = student ? (student.batch || "") : "";
 
   if (student && Array.isArray(student.subjects)) {
     selectedSubjects = new Set(student.subjects);
@@ -691,11 +776,13 @@ async function saveStudent(e) {
     id: existingId || ("STU_" + Date.now()),
     name: document.getElementById("stuName").value.trim(),
     phone: document.getElementById("stuPhone").value.trim(),
+    parentName: document.getElementById("stuParentName").value.trim(),
+    parentPhone: document.getElementById("stuParentPhone").value.trim(),
+    admissionDate: document.getElementById("stuAdmissionDate").value,
     tuitionType: document.getElementById("stuType").value,
     className: document.getElementById("stuClass").value,
     monthlyFee: Number(document.getElementById("stuMonthlyFee").value || 0),
     dueAmount: Number(document.getElementById("stuDue").value || 0),
-    batch: document.getElementById("stuBatch").value.trim(),
     subjects: Array.from(selectedSubjects),
     updatedAt: new Date().toISOString()
   };
@@ -715,6 +802,10 @@ async function deleteStudent(id) {
   renderAll();
   showToast("Student removed");
   pushToCloud(true);
+}
+
+function getPreferredWaPhone(stu) {
+  return stu.parentPhone || stu.phone || "";
 }
 
 function buildWhatsAppUrl(phone, text) {
@@ -746,17 +837,18 @@ function copyWaText() {
 function sendFeeReminder(studentId) {
   const stu = state.students.find((s) => s.id === studentId);
   if (!stu) return;
+  const greetingName = stu.parentName || `${stu.name}'s Guardian`;
   const typeLabel = stu.tuitionType === "Personal Tuition" ? " • Personal Tuition" : "";
   const subjectsStr = (stu.subjects || []).join(", ");
   const msg = [
-    `Namaskar ${stu.name}'s Guardian,`,
+    `Namaskar ${greetingName},`,
     `Friendly monthly fee reminder from *COMMERCE EDGE*.`,
     `Student: *${stu.name}* (${stu.className}${typeLabel})`,
     subjectsStr ? `Subjects: ${subjectsStr}` : "",
     `Pending Fee Due: *₹${stu.dueAmount}*`,
     `Kindly clear the balance at your convenience. Thank you!`
   ].filter(Boolean).join("\n");
-  openWhatsAppModal(`Fee Reminder • ${stu.name}`, stu.phone, msg);
+  openWhatsAppModal(`Fee Reminder • ${stu.name}`, getPreferredWaPhone(stu), msg);
 }
 
 function sendFeeReceipt(feeId) {
@@ -779,7 +871,95 @@ function sendFeeReceipt(feeId) {
     `Thank you for your payment!`
   ].filter(Boolean).join("\n");
 
-  openWhatsAppModal(`Receipt ${fee.receiptNo}`, stu.phone || "", msg);
+  openWhatsAppModal(`Receipt ${fee.receiptNo}`, getPreferredWaPhone(stu), msg);
+}
+
+function shareStudentProgress(studentId) {
+  const stu = state.students.find((s) => s.id === studentId);
+  if (!stu) return;
+  const an = getStudentAnalytics(studentId);
+  const greetingName = stu.parentName || `${stu.name}'s Guardian`;
+  const attLine = an.attPct !== null ? `Attendance: *${an.attPct}%* (${an.presentSessions}/${an.totalSessions})` : "Attendance: Not recorded yet";
+  const avgLine = an.avgPct !== null ? `Exam Average: *${an.avgPct}%* (${an.examCount} tests)` : "Exam Scores: Not recorded yet";
+  const msg = [
+    `Namaskar ${greetingName},`,
+    `*COMMERCE EDGE — PROGRESS UPDATE*`,
+    `Student: *${stu.name}* (${stu.className})`,
+    (stu.subjects || []).length ? `Subjects: ${(stu.subjects || []).join(", ")}` : "",
+    attLine,
+    avgLine
+  ].filter(Boolean).join("\n");
+  closeStudentAnalytics();
+  openWhatsAppModal(`Progress • ${stu.name}`, getPreferredWaPhone(stu), msg);
+}
+
+function openStudentAnalytics(studentId) {
+  const stu = state.students.find((s) => s.id === studentId);
+  if (!stu) return;
+  const an = getStudentAnalytics(studentId);
+
+  document.getElementById("saName").textContent = stu.name;
+  document.getElementById("saSubMeta").textContent = `${stu.className} • ${stu.tuitionType}${stu.admissionDate ? " • Admitted: " + stu.admissionDate : ""}`;
+
+  const attText = an.attPct !== null ? `${an.attPct}%` : "—";
+  const avgText = an.avgPct !== null ? `${an.avgPct}%` : "—";
+  const trendText = an.trend === "up"
+    ? `↑ +${an.trendDelta}%`
+    : an.trend === "down"
+      ? `↓ ${an.trendDelta}%`
+      : an.trend === "flat"
+        ? `→ 0%`
+        : "—";
+
+  const marksHtml = an.recentMarks.length
+    ? an.recentMarks.map((m) => `<div class="mini-log"><span><strong>${escapeHtml(m.subject)}</strong> • ${escapeHtml(m.exam)} (${m.date})</span><strong>${m.score}/${m.maxScore}</strong></div>`).join("")
+    : `<div class="item-meta">No exam scores recorded yet.</div>`;
+
+  const feesHtml = an.recentFees.length
+    ? an.recentFees.map((f) => `<div class="mini-log"><span>${f.date} • ${escapeHtml(f.receiptNo || "RECEIPT")} (${escapeHtml(f.mode)})</span><strong>₹${f.amount}</strong></div>`).join("")
+    : `<div class="item-meta">No fee payments recorded yet.</div>`;
+
+  document.getElementById("saBody").innerHTML = `
+    <div class="analytics-stat-grid">
+      <div class="mini-stat">
+        <div class="mini-stat-label">Attendance</div>
+        <div class="mini-stat-val">${attText}</div>
+        <div class="item-meta">${an.presentSessions}/${an.totalSessions} days</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-label">Exam Avg</div>
+        <div class="mini-stat-val">${avgText}</div>
+        <div class="item-meta">${an.examCount} tests</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-label">Last Trend</div>
+        <div class="mini-stat-val">${trendText}</div>
+        <div class="item-meta">vs previous</div>
+      </div>
+    </div>
+    <div class="item-meta">
+      <strong>Parent:</strong> ${escapeHtml(stu.parentName || "-")} (${escapeHtml(stu.parentPhone || "-")})
+      ${stu.phone ? ` • <strong>Student Ph:</strong> ${escapeHtml(stu.phone)}` : ""}
+    </div>
+    <div class="item-meta" style="margin-top:4px;">
+      <strong>Subjects:</strong> ${escapeHtml((stu.subjects || []).join(", ") || "None")} • <strong>Monthly Fee:</strong> ₹${stu.monthlyFee || 0} • <strong>Due:</strong> ₹${stu.dueAmount || 0}
+    </div>
+    <div class="sub-block-title">Recent Exam Scores</div>
+    ${marksHtml}
+    <div class="sub-block-title">Recent Fee Receipts</div>
+    ${feesHtml}
+  `;
+
+  document.getElementById("saActions").innerHTML = `
+    <button class="btn btn-wa btn-sm" type="button" onclick="shareStudentProgress('${stu.id}')">Share Progress on WA</button>
+    <button class="btn btn-soft btn-sm" type="button" onclick='closeStudentAnalytics(); openAddStudentForm(${JSON.stringify(stu).replace(/'/g, "&apos;")})'>Edit Profile</button>
+  `;
+
+  document.getElementById("studentAnalyticsModal").classList.add("open");
+}
+
+function closeStudentAnalytics() {
+  document.getElementById("studentAnalyticsModal").classList.remove("open");
 }
 
 function renderStudents() {
@@ -791,7 +971,11 @@ function renderStudents() {
   const filtered = state.students.filter((s) => {
     const matchType = typeFilter === "ALL" || (s.tuitionType || "Coaching Batch") === typeFilter;
     const matchCls = clsFilter === "ALL" || s.className === clsFilter;
-    const matchQ = !q || s.name.toLowerCase().includes(q) || String(s.phone || "").includes(q);
+    const matchQ = !q
+      || s.name.toLowerCase().includes(q)
+      || String(s.parentName || "").toLowerCase().includes(q)
+      || String(s.parentPhone || "").includes(q)
+      || String(s.phone || "").includes(q);
     return matchType && matchCls && matchQ;
   });
 
@@ -801,6 +985,7 @@ function renderStudents() {
   }
 
   box.innerHTML = filtered.map((s) => {
+    const an = getStudentAnalytics(s.id);
     const isPersonal = s.tuitionType === "Personal Tuition";
     const typePill = isPersonal
       ? `<span class="pill-personal">Personal Tuition</span>`
@@ -808,17 +993,39 @@ function renderStudents() {
     const dueBadge = s.dueAmount > 0
       ? `<span class="badge badge-warn">Due: ₹${s.dueAmount}</span>`
       : `<span class="badge badge-ok">Fees Clear</span>`;
+
+    const attBadgeClass = an.attPct === null ? "badge-neutral" : an.attPct < 75 ? "badge-err" : "badge-ok";
+    const attBadgeText = an.attPct !== null ? `Att: ${an.attPct}%` : "Att: —";
+
+    const trendSymbol = an.trend === "up" ? " ↑" : an.trend === "down" ? " ↓" : "";
+    const avgBadgeClass = an.avgPct === null ? "badge-neutral" : an.trend === "down" ? "badge-warn" : "badge-ok";
+    const avgBadgeText = an.avgPct !== null ? `Avg: ${an.avgPct}%${trendSymbol}` : "Marks: —";
+
     return `
       <div class="list-item">
         <div class="item-top">
           <div>
-            <div class="item-name">${escapeHtml(s.name)} <span class="pill-tag">${escapeHtml(s.className)}</span> ${typePill}</div>
-            <div class="item-meta" style="margin-top:3px;">📞 ${escapeHtml(s.phone || "-")} ${s.batch ? "• " + escapeHtml(s.batch) : ""} • Monthly: ₹${s.monthlyFee || 0}</div>
-            <div class="item-meta" style="margin-top:3px;">Subjects: ${escapeHtml((s.subjects || []).join(", ") || "None")}</div>
+            <div class="item-name">
+              <span class="name-link" onclick="openStudentAnalytics('${s.id}')">${escapeHtml(s.name)}</span>
+              <span class="pill-tag">${escapeHtml(s.className)}</span>
+              ${typePill}
+            </div>
+            <div class="item-meta" style="margin-top:3px;">
+              Parent: <strong>${escapeHtml(s.parentName || "-")}</strong> (${escapeHtml(s.parentPhone || "-")})
+              ${s.phone ? ` • Stu: ${escapeHtml(s.phone)}` : ""}
+            </div>
+            <div class="item-meta" style="margin-top:2px;">
+              ${s.admissionDate ? `Admitted: ${escapeHtml(s.admissionDate)} • ` : ""}Monthly: ₹${s.monthlyFee || 0} • Subjects: ${escapeHtml((s.subjects || []).join(", ") || "None")}
+            </div>
           </div>
           ${dueBadge}
         </div>
+        <div class="stats-row">
+          <span class="badge ${attBadgeClass}">${attBadgeText}</span>
+          <span class="badge ${avgBadgeClass}">${avgBadgeText}</span>
+        </div>
         <div class="actions-row">
+          <button class="btn btn-soft btn-sm" type="button" onclick="openStudentAnalytics('${s.id}')">Analytics</button>
           <button class="btn btn-soft btn-sm" type="button" onclick='openAddStudentForm(${JSON.stringify(s).replace(/'/g, "&apos;")})'>Edit</button>
           ${s.dueAmount > 0 ? `<button class="btn btn-wa btn-sm" type="button" onclick="sendFeeReminder('${s.id}')">WA Reminder</button>` : ""}
           <button class="btn btn-soft btn-sm" type="button" onclick="deleteStudent('${s.id}')">Delete</button>
@@ -1025,7 +1232,7 @@ function renderFees() {
           <div class="item-top">
             <div>
               <div class="item-name">${escapeHtml(s.name)} <span class="pill-tag">${escapeHtml(s.className)}</span> ${typePill}</div>
-              <div class="item-meta">📞 ${escapeHtml(s.phone || "-")} • ${escapeHtml((s.subjects || []).join(", "))}</div>
+              <div class="item-meta">Parent: ${escapeHtml(s.parentName || "-")} • WA: ${escapeHtml(getPreferredWaPhone(s) || "-")}</div>
             </div>
             <span class="badge badge-warn">Due: ₹${s.dueAmount}</span>
           </div>
@@ -1096,6 +1303,21 @@ function renderDashboard() {
   document.getElementById("classSummaryBox").innerHTML = summaryParts.length
     ? summaryParts.join(" &nbsp;•&nbsp; ")
     : "No students added yet. Tap '+ Add Student' to begin.";
+
+  const alerts = [];
+  state.students.forEach((s) => {
+    const an = getStudentAnalytics(s.id);
+    const reasons = [];
+    if (an.attPct !== null && an.attPct < 75) reasons.push(`Attendance ${an.attPct}%`);
+    if (an.trend === "down") reasons.push(`Marks ${an.trendDelta}%`);
+    if (Number(s.dueAmount || 0) > 0) reasons.push(`Due ₹${s.dueAmount}`);
+    if (reasons.length) {
+      alerts.push(`<div class="mini-log"><span class="name-link" onclick="openStudentAnalytics('${s.id}')"><strong>${escapeHtml(s.name)}</strong> (${escapeHtml(s.className)})</span><span class="badge badge-warn">${escapeHtml(reasons.join(" • "))}</span></div>`);
+    }
+  });
+  document.getElementById("attentionBox").innerHTML = alerts.length
+    ? alerts.join("")
+    : "No low-attendance, score-drop, or pending-fee alerts right now.";
 }
 
 function renderAll() {
@@ -1190,9 +1412,9 @@ function downloadBackup() {
 
 async function loadSampleData() {
   const samples = [
-    { id: "STU_S1", name: "Rohan Kalita", phone: "9864011122", tuitionType: "Coaching Batch", className: "Class 9", monthlyFee: 1000, dueAmount: 1000, batch: "4:00 PM Batch", subjects: ["Science", "Maths"] },
-    { id: "STU_S2", name: "Diya Sarmah", phone: "9864022233", tuitionType: "Personal Tuition", className: "Class 10", monthlyFee: 2000, dueAmount: 0, batch: "Home Visit • 6:00 PM", subjects: ["Science", "Maths", "Geography"] },
-    { id: "STU_S3", name: "Aritra Bora", phone: "9864033344", tuitionType: "Personal Tuition", className: "Class 12", monthlyFee: 2500, dueAmount: 2500, batch: "Personal • Political Science", subjects: ["Political Science", "Geography", "English"] }
+    { id: "STU_S1", name: "Rohan Kalita", phone: "9864011199", parentName: "Mr. Dipen Kalita", parentPhone: "9864011122", admissionDate: "2026-04-10", tuitionType: "Coaching Batch", className: "Class 9", monthlyFee: 1000, dueAmount: 1000, subjects: ["Science", "Maths"] },
+    { id: "STU_S2", name: "Diya Sarmah", phone: "", parentName: "Mrs. Kabita Sarmah", parentPhone: "9864022233", admissionDate: "2026-05-02", tuitionType: "Personal Tuition", className: "Class 10", monthlyFee: 2000, dueAmount: 0, subjects: ["Science", "Maths", "Geography"] },
+    { id: "STU_S3", name: "Aritra Bora", phone: "9864033388", parentName: "Mr. Pranab Bora", parentPhone: "9864033344", admissionDate: "2026-06-15", tuitionType: "Personal Tuition", className: "Class 12", monthlyFee: 2500, dueAmount: 2500, subjects: ["Political Science", "Geography", "English"] }
   ];
   for (const s of samples) await dbPut("students", s);
   await loadFromIDB();
