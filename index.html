@@ -1,2464 +1,1218 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Commerce Edge" />
-  <meta name="theme-color" content="#0F2A6B" />
-  <title>COMMERCE EDGE ADMIN</title>
-
-  <!-- Inline Dynamic PWA Manifest & Apple Touch Icon -->
-  <link id="pwa-manifest" rel="manifest" href="./manifest.webmanifest" />
-  <link id="apple-icon" rel="apple-touch-icon" />
-
-  <style>
-    :root {
-      --royal-900: #091B47;
-      --royal-800: #0F2A6B;
-      --royal-700: #173B94;
-      --royal-600: #1E4EC2;
-      --royal-100: #E8EFFD;
-      --royal-50:  #F3F7FF;
-      --gold-500:  #F5B800;
-      --gold-400:  #FFCA28;
-      --gold-100:  #FFF8DC;
-      --bg-ios:    #F2F4F8;
-      --card-bg:   #FFFFFF;
-      --text-main: #0F172A;
-      --text-sub:  #64748B;
-      --border:    #E2E8F0;
-      --green:     #10B981;
-      --green-bg:  #ECFDF5;
-      --red:       #EF4444;
-      --red-bg:    #FEF2F2;
-      --amber:     #F59E0B;
-      --amber-bg:  #FFFBEB;
-      --safe-top:  env(safe-area-inset-top, 20px);
-      --safe-bot:  env(safe-area-inset-bottom, 20px);
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--bg-ios);
-      color: var(--text-main);
-      height: 100%;
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* Top iOS App Bar */
-    .app-header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: linear-gradient(135deg, var(--royal-900) 0%, var(--royal-800) 100%);
-      color: #FFFFFF;
-      padding: calc(var(--safe-top) + 12px) 16px 14px 16px;
-      box-shadow: 0 4px 16px rgba(9, 27, 71, 0.18);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .brand-wrap {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-logo {
-      width: 38px;
-      height: 38px;
-      border-radius: 11px;
-      background: linear-gradient(135deg, var(--gold-400), var(--gold-500));
-      color: var(--royal-900);
-      font-weight: 900;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      letter-spacing: -0.5px;
-      box-shadow: 0 2px 8px rgba(245, 184, 0, 0.35);
-      flex-shrink: 0;
-    }
-
-    .brand-title {
-      font-size: 16px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      line-height: 1.15;
-    }
-
-    .brand-sub {
-      font-size: 11px;
-      color: var(--gold-400);
-      font-weight: 600;
-      letter-spacing: 0.4px;
-    }
-
-    .status-pill {
-      font-size: 11px;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.14);
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      cursor: pointer;
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #34D399;
-    }
-
-    .status-dot.offline {
-      background: var(--gold-400);
-    }
-
-    /* Main Scroll Container */
-    .main-container {
-      padding: 16px 16px calc(92px + var(--safe-bot)) 16px;
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    .screen {
-      display: none;
-      animation: fadeIn 0.18s ease-out;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Section Headings */
-    .section-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin: 4px 0 12px 0;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: var(--royal-900);
-      margin: 0;
-    }
-
-    /* Cards & Metrics */
-    .card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 14px;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .kpi-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .kpi-card.primary {
-      background: linear-gradient(135deg, var(--royal-800), var(--royal-700));
-      color: #FFFFFF;
-      border: none;
-    }
-
-    .kpi-card.gold {
-      background: linear-gradient(135deg, #FFFDF5, var(--gold-100));
-      border-color: #FDE68A;
-    }
-
-    .kpi-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-sub);
-      margin-bottom: 6px;
-    }
-
-    .kpi-card.primary .kpi-label {
-      color: rgba(255, 255, 255, 0.82);
-    }
-
-    .kpi-val {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--royal-900);
-      letter-spacing: -0.5px;
-    }
-
-    .kpi-card.primary .kpi-val {
-      color: var(--gold-400);
-    }
-
-    .kpi-sub {
-      font-size: 11px;
-      margin-top: 4px;
-      font-weight: 600;
-      color: var(--text-sub);
-    }
-
-    .kpi-card.primary .kpi-sub {
-      color: rgba(255, 255, 255, 0.78);
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      min-height: 44px;
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.1s ease, opacity 0.15s ease;
-    }
-
-    .btn:active {
-      transform: scale(0.97);
-    }
-
-    .btn-primary {
-      background: var(--royal-800);
-      color: #FFFFFF;
-    }
-
-    .btn-gold {
-      background: var(--gold-500);
-      color: var(--royal-900);
-    }
-
-    .btn-outline {
-      background: var(--royal-50);
-      color: var(--royal-800);
-      border: 1px solid #CBD5E1;
-    }
-
-    .btn-danger {
-      background: var(--red-bg);
-      color: var(--red);
-      border: 1px solid #FECACA;
-    }
-
-    .btn-sm {
-      min-height: 36px;
-      padding: 6px 12px;
-      font-size: 12px;
-      border-radius: 10px;
-    }
-
-    .btn-block {
-      width: 100%;
-    }
-
-    .quick-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    /* Form Controls */
-    .form-group {
-      margin-bottom: 13px;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--royal-900);
-      margin-bottom: 5px;
-    }
-
-    .form-control {
-      width: 100%;
-      min-height: 44px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border: 1.5px solid #CBD5E1;
-      background: #FFFFFF;
-      font-size: 15px;
-      color: var(--text-main);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
-    .form-control:focus {
-      border-color: var(--royal-700);
-    }
-
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    /* Subject Checkboxes */
-    .chip-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .subject-chip {
-      position: relative;
-    }
-
-    .subject-chip input {
-      position: absolute;
-      opacity: 0;
-    }
-
-    .subject-chip span {
-      display: inline-block;
-      padding: 8px 12px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 700;
-      background: var(--bg-ios);
-      color: var(--text-sub);
-      border: 1.5px solid var(--border);
-      cursor: pointer;
-    }
-
-    .subject-chip input:checked + span {
-      background: var(--royal-800);
-      color: var(--gold-400);
-      border-color: var(--royal-800);
-    }
-
-    /* Search & Filter Bar */
-    .search-box {
-      position: relative;
-      margin-bottom: 12px;
-    }
-
-    .search-box input {
-      padding-left: 38px;
-    }
-
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-sub);
-      font-size: 16px;
-    }
-
-    /* Segmented Tabs */
-    .segmented {
-      display: flex;
-      background: #E2E8F0;
-      padding: 3px;
-      border-radius: 12px;
-      margin-bottom: 14px;
-    }
-
-    .seg-btn {
-      flex: 1;
-      min-height: 36px;
-      border: none;
-      background: transparent;
-      border-radius: 9px;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-sub);
-      cursor: pointer;
-    }
-
-    .seg-btn.active {
-      background: #FFFFFF;
-      color: var(--royal-900);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    }
-
-    /* Badges */
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 8px;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .badge-royal { background: var(--royal-100); color: var(--royal-800); }
-    .badge-gold  { background: var(--gold-100); color: #92400E; }
-    .badge-green { background: var(--green-bg); color: #065F46; }
-    .badge-red   { background: var(--red-bg); color: #991B1B; }
-    .badge-amber { background: var(--amber-bg); color: #92400E; }
-
-    /* Student List Item */
-    .student-item {
-      background: #FFFFFF;
-      border-radius: 15px;
-      padding: 14px;
-      margin-bottom: 10px;
-      border: 1px solid var(--border);
-      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-    }
-
-    .student-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 10px;
-    }
-
-    .student-name {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--royal-900);
-    }
-
-    .student-meta {
-      font-size: 12px;
-      color: var(--text-sub);
-      margin-top: 3px;
-      line-height: 1.4;
-    }
-
-    .student-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* Attendance Pills */
-    .att-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 12px 14px;
-      background: #FFFFFF;
-      border-radius: 14px;
-      border: 1px solid var(--border);
-      margin-bottom: 9px;
-    }
-
-    .att-btns {
-      display: flex;
-      gap: 6px;
-    }
-
-    .att-pill {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: #F8FAFC;
-      font-weight: 800;
-      font-size: 13px;
-      color: var(--text-sub);
-      cursor: pointer;
-    }
-
-    .att-pill.active-P { background: var(--green); border-color: var(--green); color: #FFFFFF; }
-    .att-pill.active-A { background: var(--red); border-color: var(--red); color: #FFFFFF; }
-    .att-pill.active-L { background: var(--gold-500); border-color: var(--gold-500); color: var(--royal-900); }
-
-    /* Table Wrapper */
-    .table-wrap {
-      overflow-x: auto;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-      background: #FFFFFF;
-    }
-
-    th {
-      background: var(--royal-800);
-      color: #FFFFFF;
-      text-align: left;
-      padding: 10px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    td {
-      padding: 10px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text-main);
-    }
-
-    tr:last-child td {
-      border-bottom: none;
-    }
-
-    /* Bottom Navigation Bar (iOS Tab Bar) */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      z-index: 60;
-      background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-top: 1px solid var(--border);
-      padding: 6px 4px calc(6px + var(--safe-bot)) 4px;
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-    }
-
-    .nav-item {
-      border: none;
-      background: transparent;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      padding: 4px 2px;
-      color: var(--text-sub);
-      cursor: pointer;
-      min-height: 48px;
-    }
-
-    .nav-item svg {
-      width: 21px;
-      height: 21px;
-      stroke-width: 2;
-    }
-
-    .nav-item span {
-      font-size: 10px;
-      font-weight: 700;
-    }
-
-    .nav-item.active {
-      color: var(--royal-800);
-    }
-
-    .nav-item.active .nav-icon-wrap {
-      background: var(--gold-400);
-      color: var(--royal-900);
-      padding: 3px 10px;
-      border-radius: 999px;
-    }
-
-    /* iOS Modal Sheet */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(9, 27, 71, 0.55);
-      z-index: 100;
-      display: none;
-      align-items: flex-end;
-      justify-content: center;
-    }
-
-    .modal-backdrop.open {
-      display: flex;
-    }
-
-    .modal-sheet {
-      background: #FFFFFF;
-      width: 100%;
-      max-width: 680px;
-      max-height: 90vh;
-      overflow-y: auto;
-      border-radius: 22px 22px 0 0;
-      padding: 18px 18px calc(24px + var(--safe-bot)) 18px;
-      animation: slideUp 0.22s ease-out;
-    }
-
-    @keyframes slideUp {
-      from { transform: translateY(100%); }
-      to { transform: translateY(0); }
-    }
-
-    .modal-handle {
-      width: 40px;
-      height: 5px;
-      border-radius: 99px;
-      background: #CBD5E1;
-      margin: 0 auto 14px auto;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
-
-    .modal-title {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--royal-900);
-      margin: 0;
-    }
-
-    /* Toast Notification */
-    .toast {
-      position: fixed;
-      top: calc(var(--safe-top) + 68px);
-      left: 50%;
-      transform: translateX(-50%) translateY(-20px);
-      background: var(--royal-900);
-      color: var(--gold-400);
-      padding: 10px 18px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.22);
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.22s ease;
-      z-index: 200;
-      white-space: nowrap;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 28px 16px;
-      color: var(--text-sub);
-      font-size: 13px;
-    }
-
-    .progress-track {
-      height: 8px;
-      background: #E2E8F0;
-      border-radius: 99px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--green);
-      border-radius: 99px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#0f294a" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Commerce Edge" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<title>COMMERCE EDGE ADMIN</title>
+<style>
+  :root {
+    --navy: #0f294a;
+    --navy-2: #193d6b;
+    --gold: #eab308;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --ok: #15803d;
+    --ok-bg: #dcfce7;
+    --warn: #b45309;
+    --warn-bg: #fef3c7;
+    --err: #b91c1c;
+    --err-bg: #fee2e2;
+    --personal: #4338ca;
+    --personal-bg: #e0e7ff;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 84px;
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy), var(--navy-2));
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: 0 2px 10px rgba(15, 41, 74, 0.15);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-badge {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: var(--gold); color: var(--navy);
+    font-weight: 800; display: grid; place-items: center; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .brand-title { font-weight: 800; font-size: 15px; letter-spacing: 0.3px; }
+  .brand-sub { font-size: 11px; opacity: 0.85; }
+  .sync-pill {
+    background: rgba(255,255,255,0.14);
+    border: 1px solid rgba(255,255,255,0.22);
+    color: #fff;
+    border-radius: 999px;
+    padding: 6px 11px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+  .dot.warn { background: #facc15; }
+  .dot.err { background: #f87171; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 14px; }
+  .section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin: 4px 0 12px; flex-wrap: wrap;
+  }
+  .section-title { font-size: 18px; font-weight: 800; margin: 0; }
+  .pill-tag {
+    background: #e2e8f0; color: #334155;
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    display: inline-block;
+  }
+  .pill-personal {
+    background: var(--personal-bg); color: var(--personal);
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    display: inline-block;
+  }
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px;
+  }
+  @media (min-width: 640px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+  .kpi {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px;
+  }
+  .kpi-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+  .kpi-val { font-size: 24px; font-weight: 800; margin-top: 4px; }
+  .kpi-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 12px;
+  }
+  .card-title { font-weight: 700; font-size: 15px; margin: 0 0 10px; }
+  .quick-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 640px) { .quick-grid { grid-template-columns: repeat(4, 1fr); } }
+
+  button, .btn {
+    border: none; border-radius: 10px; padding: 10px 12px;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    text-decoration: none;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-soft { background: #f1f5f9; color: var(--text); border: 1px solid var(--border); }
+  .btn-wa { background: #16a34a; color: #fff; }
+  .btn-sm { padding: 7px 10px; font-size: 12px; border-radius: 8px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 640px) { .form-grid.cols-2 { grid-template-columns: repeat(2, 1fr); } }
+  label { display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px; }
+  input, select, textarea {
+    width: 100%; padding: 10px 11px; border: 1px solid #cbd5e1;
+    border-radius: 10px; font-size: 14px; background: #fff; color: var(--text);
+    font-family: inherit;
+  }
+  .chips-wrap { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1px solid #cbd5e1; background: #fff; color: #334155;
+    border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700;
+    cursor: pointer;
+  }
+  .chip.active { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filter-bar input, .filter-bar select { max-width: 220px; }
+
+  .list-item {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px; margin-bottom: 10px; background: #fff;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .item-name { font-weight: 800; font-size: 15px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .item-meta { font-size: 12px; color: var(--muted); }
+  .badge {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px;
+    display: inline-block; white-space: nowrap;
+  }
+  .badge-ok { background: var(--ok-bg); color: var(--ok); }
+  .badge-warn { background: var(--warn-bg); color: var(--warn); }
+  .badge-err { background: var(--err-bg); color: var(--err); }
+  .actions-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  nav.bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: #fff; border-top: 1px solid var(--border);
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    padding: 6px 4px env(safe-area-inset-bottom, 6px);
+    z-index: 20;
+  }
+  .nav-btn {
+    background: transparent; color: var(--muted); flex-direction: column;
+    gap: 2px; padding: 6px 2px; font-size: 11px; font-weight: 700; border-radius: 8px;
+  }
+  .nav-btn.active { color: var(--navy); background: #eff6ff; }
+  .nav-icon { font-size: 17px; line-height: 1; }
+
+  .toast {
+    position: fixed; top: 68px; left: 50%; transform: translateX(-50%);
+    background: var(--navy); color: #fff; padding: 10px 16px;
+    border-radius: 999px; font-size: 13px; font-weight: 700;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2); z-index: 50;
+    display: none; max-width: 92vw; text-align: center;
+  }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+    display: none; align-items: center; justify-content: center;
+    padding: 16px; z-index: 60;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: #fff; border-radius: 16px; padding: 16px;
+    width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+    box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+  }
+  .hidden { display: none !important; }
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="app-header">
-    <div class="brand-wrap">
-      <div class="brand-logo">CE</div>
-      <div>
-        <div class="brand-title">COMMERCE EDGE ADMIN</div>
-        <div class="brand-sub">Odalbakra, Guwahati • Single Admin</div>
-      </div>
-    </div>
-    <div class="status-pill" id="network-status" onclick="manualCloudSync()" title="Tap to Sync Now">
-      <span class="status-dot" id="status-dot"></span>
-      <span id="status-text">Offline Ready</span>
-    </div>
-  </header>
-
-  <!-- Toast -->
-  <div id="toast" class="toast">Saved</div>
-
-  <!-- Main Content -->
-  <main class="main-container">
-
-    <!-- 1. DASHBOARD SCREEN -->
-    <section id="screen-dashboard" class="screen active">
-      <div class="section-head">
-        <h1 class="section-title">Admin Overview</h1>
-        <span class="badge badge-royal" id="dash-today-label"></span>
-      </div>
-
-      <div class="kpi-grid">
-        <div class="kpi-card primary">
-          <div class="kpi-label">Total Students</div>
-          <div class="kpi-val" id="kpi-students">0</div>
-          <div class="kpi-sub" id="kpi-batches-sub">0 Active Batches</div>
-        </div>
-        <div class="kpi-card gold">
-          <div class="kpi-label">Today's Attendance</div>
-          <div class="kpi-val" id="kpi-attendance">0%</div>
-          <div class="kpi-sub" id="kpi-att-sub">0 Present / 0 Marked</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Monthly Collection</div>
-          <div class="kpi-val" style="color: var(--green);" id="kpi-collected">₹0</div>
-          <div class="kpi-sub" id="kpi-month-sub">This Month</div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-label">Pending Fees</div>
-          <div class="kpi-val" style="color: var(--red);" id="kpi-pending">₹0</div>
-          <div class="kpi-sub" id="kpi-defaulters-sub">0 Students Due</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:10px;">Quick Admin Actions</div>
-        <div class="quick-actions">
-          <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
-          <button class="btn btn-gold" onclick="switchTab('attendance')">Mark Attendance</button>
-          <button class="btn btn-outline" onclick="openFeePaymentModal()">Record Fee Payment</button>
-          <button class="btn btn-outline" onclick="openExamModal()">+ Add Exam Marks</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <span style="font-weight:800; font-size:14px; color:var(--royal-900);">Batch Strength</span>
-          <span class="badge badge-gold">2026–27 Session</span>
-        </div>
-        <div id="dash-batch-breakdown"></div>
-      </div>
-
-      <div class="card">
-        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:10px;">Recent Fee Receipts</div>
-        <div id="dash-recent-fees"></div>
-      </div>
-    </section>
-
-    <!-- 2. STUDENTS SCREEN -->
-    <section id="screen-students" class="screen">
-      <div class="section-head">
-        <h1 class="section-title">Students</h1>
-        <button class="btn btn-gold btn-sm" onclick="openStudentModal()">+ New Student</button>
-      </div>
-
-      <div class="search-box">
-        <span class="search-icon">🔍</span>
-        <input type="text" id="student-search" class="form-control" placeholder="Search name, phone, batch, guardian..." oninput="renderStudents()" />
-      </div>
-
-      <div class="form-row" style="margin-bottom:12px;">
-        <select id="filter-class" class="form-control" onchange="renderStudents()">
-          <option value="">All Classes</option>
-          <option value="Class 11">Class 11</option>
-          <option value="Class 12">Class 12</option>
-          <option value="B.Com">B.Com</option>
-        </select>
-        <select id="filter-batch" class="form-control" onchange="renderStudents()">
-          <option value="">All Batches</option>
-        </select>
-      </div>
-
-      <div id="student-list"></div>
-    </section>
-
-    <!-- 3. ATTENDANCE SCREEN -->
-    <section id="screen-attendance" class="screen">
-      <div class="section-head">
-        <h1 class="section-title">Attendance</h1>
-      </div>
-
-      <div class="segmented">
-        <button class="seg-btn active" id="att-tab-daily" onclick="switchAttSubtab('daily')">Daily Register</button>
-        <button class="seg-btn" id="att-tab-monthly" onclick="switchAttSubtab('monthly')">Monthly Report</button>
-      </div>
-
-      <!-- Daily Register -->
-      <div id="att-daily-view">
-        <div class="card">
-          <div class="form-row">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Date</label>
-              <input type="date" id="att-date" class="form-control" onchange="renderDailyAttendance()" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Batch Filter</label>
-              <select id="att-batch-filter" class="form-control" onchange="renderDailyAttendance()">
-                <option value="">All Batches</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:12px;">
-            <button class="btn btn-outline btn-sm" style="flex:1;" onclick="markAllAttendance('P')">Mark All Present</button>
-            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="saveDailyAttendance()">Save Register</button>
-          </div>
-        </div>
-        <div id="att-student-rows"></div>
-      </div>
-
-      <!-- Monthly Attendance Report -->
-      <div id="att-monthly-view" style="display:none;">
-        <div class="card">
-          <div class="form-row">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Select Month</label>
-              <input type="month" id="att-month" class="form-control" onchange="renderMonthlyAttendance()" />
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Batch</label>
-              <select id="att-month-batch" class="form-control" onchange="renderMonthlyAttendance()">
-                <option value="">All Batches</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div id="att-monthly-table"></div>
-      </div>
-    </section>
-
-    <!-- 4. MARKS SCREEN -->
-    <section id="screen-marks" class="screen">
-      <div class="section-head">
-        <h1 class="section-title">Exam Marks</h1>
-        <button class="btn btn-gold btn-sm" onclick="openExamModal()">+ Add Marks</button>
-      </div>
-
-      <div class="form-row" style="margin-bottom:12px;">
-        <select id="marks-student-filter" class="form-control" onchange="renderMarks()">
-          <option value="">All Students</option>
-        </select>
-        <select id="marks-subject-filter" class="form-control" onchange="renderMarks()">
-          <option value="">All Subjects</option>
-          <option value="Accountancy">Accountancy</option>
-          <option value="Business Studies">Business Studies</option>
-          <option value="Economics">Economics</option>
-          <option value="Finance">Finance</option>
-          <option value="English">English</option>
-        </select>
-      </div>
-
-      <div id="marks-list"></div>
-    </section>
-
-    <!-- 5. FEES SCREEN -->
-    <section id="screen-fees" class="screen">
-      <div class="section-head">
-        <h1 class="section-title">Fees & Ledger</h1>
-        <button class="btn btn-gold btn-sm" onclick="openFeePaymentModal()">+ Collect Fee</button>
-      </div>
-
-      <div class="segmented">
-        <button class="seg-btn active" id="fee-tab-balances" onclick="switchFeeSubtab('balances')">Student Balances</button>
-        <button class="seg-btn" id="fee-tab-history" onclick="switchFeeSubtab('history')">Payment History</button>
-      </div>
-
-      <div id="fee-balances-view">
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="fee-search" class="form-control" placeholder="Filter student fee status..." oninput="renderFees()" />
-        </div>
-        <div id="fee-student-cards"></div>
-      </div>
-
-      <div id="fee-history-view" style="display:none;">
-        <div id="fee-payments-list"></div>
-      </div>
-    </section>
-
-    <!-- 6. REPORTS & BACKUP SCREEN -->
-    <section id="screen-more" class="screen">
-      <div class="section-head">
-        <h1 class="section-title">Reports & Backup</h1>
-      </div>
-
-      <!-- Cloud Sync Controls -->
-      <div class="card">
-        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Google Sheets Cloud Sync</div>
-        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;" id="cloud-sync-info">Auto-syncs whenever you save records online.</div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-primary btn-sm" style="flex:1;" onclick="pullFromCloud(true)">⬇ Pull from Cloud</button>
-          <button class="btn btn-gold btn-sm" style="flex:1;" onclick="pushToCloud(true)">⬆ Push to Cloud</button>
-        </div>
-      </div>
-
-      <!-- CSV Reports -->
-      <div class="card">
-        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Export CSV Reports</div>
-        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Download Excel-compatible CSV spreadsheets directly to your iPhone Files app.</div>
-
-        <div class="form-group">
-          <label class="form-label">Batch-wise Master Report</label>
-          <div style="display:flex; gap:8px;">
-            <select id="report-batch-select" class="form-control">
-              <option value="">All Batches</option>
-            </select>
-            <button class="btn btn-primary" onclick="exportBatchCSV()">Export CSV</button>
-          </div>
-        </div>
-
-        <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label">Student-wise Complete Report</label>
-          <div style="display:flex; gap:8px;">
-            <select id="report-student-select" class="form-control"></select>
-            <button class="btn btn-gold" onclick="exportStudentCSV()">Export CSV</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Live Report Preview -->
-      <div class="card">
-        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:10px;">Batch Summary Preview</div>
-        <div id="batch-report-preview"></div>
-      </div>
-
-      <!-- JSON Backup & Restore -->
-      <div class="card">
-        <div style="font-weight:800; font-size:15px; color:var(--royal-900); margin-bottom:4px;">Full Offline JSON Backup</div>
-        <div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">Export all students, attendance, exam marks, and fee records into a portable JSON file.</div>
-        <button class="btn btn-primary btn-block" style="margin-bottom:10px;" onclick="exportJSONBackup()">⬇ Download Complete JSON Backup</button>
-
-        <label class="btn btn-outline btn-block" style="cursor:pointer;">
-          ⬆ Restore from JSON Backup
-          <input type="file" id="restore-json-input" accept=".json,application/json" style="display:none;" onchange="restoreJSONBackup(event)" />
-        </label>
-      </div>
-
-      <!-- Sample Data / Reset -->
-      <div class="card">
-        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin-bottom:8px;">Data Utilities</div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn btn-outline btn-sm" style="flex:1;" onclick="seedDemoData()">Load Sample Data</button>
-          <button class="btn btn-danger btn-sm" style="flex:1;" onclick="clearAllDatabase()">Reset All Data</button>
-        </div>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Bottom iOS Navigation -->
-  <nav class="bottom-nav">
-    <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-      </div>
-      <span>Home</span>
-    </button>
-    <button class="nav-item" data-tab="students" onclick="switchTab('students')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      </div>
-      <span>Students</span>
-    </button>
-    <button class="nav-item" data-tab="attendance" onclick="switchTab('attendance')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      </div>
-      <span>Attend</span>
-    </button>
-    <button class="nav-item" data-tab="marks" onclick="switchTab('marks')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
-      </div>
-      <span>Marks</span>
-    </button>
-    <button class="nav-item" data-tab="fees" onclick="switchTab('fees')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      </div>
-      <span>Fees</span>
-    </button>
-    <button class="nav-item" data-tab="more" onclick="switchTab('more')">
-      <div class="nav-icon-wrap">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      </div>
-      <span>Reports</span>
-    </button>
-  </nav>
-
-  <!-- MODAL 1: ADD / EDIT STUDENT -->
-  <div class="modal-backdrop" id="modal-student">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2 class="modal-title" id="student-modal-title">Add Student</h2>
-        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-student')">Close</button>
-      </div>
-      <form id="form-student" onsubmit="saveStudent(event)">
-        <input type="hidden" id="stu-id" />
-        <div class="form-group">
-          <label class="form-label">Student Full Name *</label>
-          <input type="text" id="stu-name" class="form-control" required placeholder="e.g., Rahul Sharma" />
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Student Phone *</label>
-            <input type="tel" id="stu-phone" class="form-control" required pattern="[0-9+\s-]{10,15}" placeholder="98640XXXXX" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Admission Date *</label>
-            <input type="date" id="stu-admission" class="form-control" required />
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Class / Stream *</label>
-            <select id="stu-class" class="form-control" required>
-              <option value="Class 11">Class 11 (HS 1st Year)</option>
-              <option value="Class 12">Class 12 (HS 2nd Year)</option>
-              <option value="B.Com">B.Com</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Batch Name *</label>
-            <input type="text" id="stu-batch" class="form-control" required list="batch-suggestions" placeholder="e.g., Morning XI-A" />
-            <datalist id="batch-suggestions">
-              <option value="Morning XI-A">
-              <option value="Evening XII-A">
-              <option value="CBSE XII Commerce">
-              <option value="ASSEB XII Commerce">
-            </datalist>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Subjects Enrolled *</label>
-          <div class="chip-group" id="stu-subjects-group">
-            <label class="subject-chip"><input type="checkbox" value="Accountancy" checked /><span>Accountancy</span></label>
-            <label class="subject-chip"><input type="checkbox" value="Business Studies" checked /><span>Business Studies</span></label>
-            <label class="subject-chip"><input type="checkbox" value="Economics" /><span>Economics</span></label>
-            <label class="subject-chip"><input type="checkbox" value="Finance" /><span>Finance</span></label>
-            <label class="subject-chip"><input type="checkbox" value="English" /><span>English</span></label>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Guardian Name *</label>
-            <input type="text" id="stu-guardian" class="form-control" required placeholder="Parent / Guardian" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Guardian Phone *</label>
-            <input type="tel" id="stu-guardian-phone" class="form-control" required pattern="[0-9+\s-]{10,15}" placeholder="94350XXXXX" />
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Total Course / Annual Fee (₹) *</label>
-          <input type="number" id="stu-total-fee" class="form-control" required min="0" step="100" placeholder="12000" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Save Student Record</button>
-      </form>
+<header>
+  <div class="brand">
+    <div class="brand-badge">CE</div>
+    <div>
+      <div class="brand-title">COMMERCE EDGE ADMIN</div>
+      <div class="brand-sub">Classes 8–12 • Batch & Personal Tuition</div>
     </div>
   </div>
+  <button id="syncPill" class="sync-pill" type="button" onclick="triggerSync()">
+    <span id="syncDot" class="dot warn"></span>
+    <span id="syncText">Local Storage Active</span>
+  </button>
+</header>
 
-  <!-- MODAL 2: ADD EXAM MARKS -->
-  <div class="modal-backdrop" id="modal-exam">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2 class="modal-title">Add Examination Marks</h2>
-        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-exam')">Close</button>
+<div id="toast" class="toast"></div>
+
+<main>
+  <!-- HOME TAB -->
+  <section id="tab-home">
+    <div class="section-head">
+      <h1 class="section-title">Admin Overview</h1>
+      <span id="todayBadge" class="pill-tag"></span>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi-label">Total Students</div>
+        <div id="kpiStudents" class="kpi-val">0</div>
+        <div id="kpiBatches" class="kpi-sub">0 Batch • 0 Personal</div>
       </div>
-      <form id="form-exam" onsubmit="saveExamMark(event)">
-        <div class="form-group">
-          <label class="form-label">Select Student *</label>
-          <select id="exam-student" class="form-control" required></select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Exam Title *</label>
-            <input type="text" id="exam-title" class="form-control" required placeholder="Unit Test 1 / Pre-Board" />
+      <div class="kpi">
+        <div class="kpi-label">Today's Attendance</div>
+        <div id="kpiAttendance" class="kpi-val">0%</div>
+        <div id="kpiAttSub" class="kpi-sub">0 Present / 0 Marked</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Monthly Collection</div>
+        <div id="kpiCollected" class="kpi-val">₹0</div>
+        <div id="kpiMonthSub" class="kpi-sub">This Month</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Pending Fees</div>
+        <div id="kpiPending" class="kpi-val">₹0</div>
+        <div id="kpiDueSub" class="kpi-sub">0 Students Due</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Quick Admin Actions</div>
+      <div class="quick-grid">
+        <button class="btn btn-primary" type="button" onclick="switchTab('students'); openAddStudentForm();">+ Add Student</button>
+        <button class="btn btn-gold" type="button" onclick="switchTab('attend')">Mark Attendance</button>
+        <button class="btn btn-soft" type="button" onclick="switchTab('fees')">Record Fee Payment</button>
+        <button class="btn btn-soft" type="button" onclick="switchTab('marks')">+ Add Exam Marks</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Class & Tuition Breakdown</div>
+      <div id="classSummaryBox" class="item-meta">No students added yet.</div>
+    </div>
+  </section>
+
+  <!-- STUDENTS TAB -->
+  <section id="tab-students" class="hidden">
+    <div class="section-head">
+      <h1 class="section-title">Students</h1>
+      <button class="btn btn-primary btn-sm" type="button" onclick="openAddStudentForm()">+ Add Student</button>
+    </div>
+
+    <div class="filter-bar">
+      <input id="studentSearch" type="search" placeholder="Search name or phone..." oninput="renderStudents()" />
+      <select id="studentTypeFilter" onchange="renderStudents()">
+        <option value="ALL">All Types (Batch + Personal)</option>
+        <option value="Coaching Batch">Coaching Batch</option>
+        <option value="Personal Tuition">Personal Tuition</option>
+      </select>
+      <select id="studentClassFilter" onchange="renderStudents()">
+        <option value="ALL">All Classes (8–12)</option>
+        <option value="Class 8">Class 8</option>
+        <option value="Class 9">Class 9</option>
+        <option value="Class 10">Class 10</option>
+        <option value="Class 11">Class 11</option>
+        <option value="Class 12">Class 12</option>
+      </select>
+    </div>
+
+    <div id="studentFormCard" class="card hidden">
+      <div class="card-title" id="studentFormTitle">Add New Student</div>
+      <form id="studentForm" onsubmit="saveStudent(event)">
+        <input type="hidden" id="stuId" />
+        <div class="form-grid cols-2">
+          <div>
+            <label>Student Name *</label>
+            <input id="stuName" required placeholder="e.g., Ananya Das" />
           </div>
-          <div class="form-group">
-            <label class="form-label">Exam Date *</label>
-            <input type="date" id="exam-date" class="form-control" required />
+          <div>
+            <label>Guardian / WhatsApp Number (10 digits) *</label>
+            <input id="stuPhone" required pattern="[0-9]{10}" maxlength="10" placeholder="9876543210" />
+          </div>
+          <div>
+            <label>Tuition Type *</label>
+            <select id="stuType">
+              <option value="Coaching Batch">Coaching Batch</option>
+              <option value="Personal Tuition">Personal Tuition</option>
+            </select>
+          </div>
+          <div>
+            <label>Class *</label>
+            <select id="stuClass" onchange="applyClassDefaults()">
+              <option value="Class 8">Class 8</option>
+              <option value="Class 9">Class 9</option>
+              <option value="Class 10" selected>Class 10</option>
+              <option value="Class 11">Class 11</option>
+              <option value="Class 12">Class 12</option>
+            </select>
+          </div>
+          <div>
+            <label>Monthly Fee (₹) *</label>
+            <input id="stuMonthlyFee" type="number" min="0" required placeholder="1200" />
+          </div>
+          <div>
+            <label>Pending / Opening Balance (₹)</label>
+            <input id="stuDue" type="number" min="0" value="0" />
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label>Timing / Location Note</label>
+            <input id="stuBatch" placeholder="e.g., Evening 4:30 PM or Home Visit - Beltola" />
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Subject *</label>
-          <select id="exam-subject" class="form-control" required>
-            <option value="Accountancy">Accountancy</option>
-            <option value="Business Studies">Business Studies</option>
-            <option value="Economics">Economics</option>
-            <option value="Finance">Finance</option>
-            <option value="English">English</option>
-          </select>
+
+        <div style="margin-top:10px;">
+          <label>Subjects</label>
+          <div id="subjectChips" class="chips-wrap"></div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Marks Obtained *</label>
-            <input type="number" id="exam-obtained" class="form-control" required min="0" step="0.5" placeholder="78" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Maximum Marks *</label>
-            <input type="number" id="exam-max" class="form-control" required min="1" step="1" value="100" />
-          </div>
+
+        <div class="actions-row" style="margin-top:14px;">
+          <button class="btn btn-primary" type="submit">Save Student</button>
+          <button class="btn btn-soft" type="button" onclick="closeStudentForm()">Cancel</button>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Save Exam Score</button>
       </form>
     </div>
-  </div>
 
-  <!-- MODAL 3: RECORD FEE PAYMENT -->
-  <div class="modal-backdrop" id="modal-fee">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2 class="modal-title">Record Fee Payment</h2>
-        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-fee')">Close</button>
-      </div>
-      <form id="form-fee" onsubmit="saveFeePayment(event)">
-        <div class="form-group">
-          <label class="form-label">Select Student *</label>
-          <select id="fee-student" class="form-control" required onchange="updateFeeModalHint()"></select>
-          <div id="fee-balance-hint" style="font-size:12px; color:var(--royal-800); font-weight:700; margin-top:5px;"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Amount Paid (₹) *</label>
-            <input type="number" id="fee-amount" class="form-control" required min="1" step="1" placeholder="2000" />
+    <div id="studentsList"></div>
+  </section>
+
+  <!-- ATTENDANCE TAB -->
+  <section id="tab-attend" class="hidden">
+    <div class="section-head">
+      <h1 class="section-title">Attendance</h1>
+      <input id="attDate" type="date" style="max-width:170px;" onchange="renderAttendance()" />
+    </div>
+    <div class="filter-bar">
+      <select id="attTypeFilter" onchange="renderAttendance()">
+        <option value="ALL">All Types</option>
+        <option value="Coaching Batch">Coaching Batch</option>
+        <option value="Personal Tuition">Personal Tuition</option>
+      </select>
+      <select id="attClassFilter" onchange="renderAttendance()">
+        <option value="ALL">All Classes (8–12)</option>
+        <option value="Class 8">Class 8</option>
+        <option value="Class 9">Class 9</option>
+        <option value="Class 10">Class 10</option>
+        <option value="Class 11">Class 11</option>
+        <option value="Class 12">Class 12</option>
+      </select>
+    </div>
+    <div id="attendanceList"></div>
+  </section>
+
+  <!-- MARKS TAB -->
+  <section id="tab-marks" class="hidden">
+    <div class="section-head">
+      <h1 class="section-title">Exam Marks</h1>
+    </div>
+    <div class="card">
+      <form id="marksForm" onsubmit="saveMark(event)">
+        <div class="form-grid cols-2">
+          <div>
+            <label>Student *</label>
+            <select id="markStudent" required></select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Payment Date *</label>
-            <input type="date" id="fee-date" class="form-control" required />
+          <div>
+            <label>Subject *</label>
+            <select id="markSubject" required>
+              <option value="Science">Science</option>
+              <option value="Maths">Maths</option>
+              <option value="Accountancy">Accountancy</option>
+              <option value="Business Studies">Business Studies</option>
+              <option value="Economics">Economics</option>
+              <option value="Finance">Finance</option>
+              <option value="English">English</option>
+              <option value="Political Science">Political Science</option>
+              <option value="Geography">Geography</option>
+            </select>
+          </div>
+          <div>
+            <label>Exam / Test Title *</label>
+            <input id="markExam" required placeholder="Unit Test 1" />
+          </div>
+          <div>
+            <label>Score / Out Of *</label>
+            <div style="display:flex; gap:8px;">
+              <input id="markScore" type="number" step="0.5" min="0" required placeholder="42" />
+              <input id="markMax" type="number" step="0.5" min="1" required value="50" />
+            </div>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Payment Mode *</label>
-            <select id="fee-mode" class="form-control" required>
-              <option value="UPI">UPI (GPay / PhonePe)</option>
+        <div style="margin-top:12px;">
+          <button class="btn btn-primary" type="submit">Save Marks</button>
+        </div>
+      </form>
+    </div>
+    <div id="marksList"></div>
+  </section>
+
+  <!-- FEES TAB -->
+  <section id="tab-fees" class="hidden">
+    <div class="section-head">
+      <h1 class="section-title">Fees & WhatsApp Receipts</h1>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Record Monthly Fee Payment</div>
+      <form id="feeForm" onsubmit="saveFeePayment(event)">
+        <div class="form-grid cols-2">
+          <div>
+            <label>Student *</label>
+            <select id="feeStudent" required onchange="prefillFeeAmount()"></select>
+          </div>
+          <div>
+            <label>Amount Paid (₹) *</label>
+            <input id="feeAmount" type="number" min="1" required placeholder="1200" />
+          </div>
+          <div>
+            <label>Payment Mode</label>
+            <select id="feeMode">
+              <option value="UPI">UPI</option>
               <option value="Cash">Cash</option>
               <option value="Bank Transfer">Bank Transfer</option>
             </select>
           </div>
-          <div class="form-group">
-            <label class="form-label">Note / Month</label>
-            <input type="text" id="fee-note" class="form-control" placeholder="e.g., Nov Installment" />
+          <div>
+            <label>Month / Particulars</label>
+            <input id="feeNote" placeholder="e.g., Nov 2026 Tuition" />
           </div>
         </div>
-        <button type="submit" class="btn btn-gold btn-block">Confirm & Save Receipt</button>
+        <div style="margin-top:12px;">
+          <button class="btn btn-gold" type="submit">Save Payment & Generate Receipt</button>
+        </div>
       </form>
     </div>
-  </div>
 
-  <!-- MODAL 4: STUDENT PROFILE & PERFORMANCE HISTORY -->
-  <div class="modal-backdrop" id="modal-profile">
-    <div class="modal-sheet">
-      <div class="modal-handle"></div>
-      <div class="modal-header">
-        <h2 class="modal-title" id="profile-title">Student Profile</h2>
-        <button class="btn btn-outline btn-sm" onclick="closeModal('modal-profile')">Close</button>
+    <div class="card">
+      <div class="item-top" style="margin-bottom:8px;">
+        <div class="card-title" style="margin:0;">Pending Fee Reminders</div>
+        <select id="feeTypeFilter" style="max-width:170px; padding:6px 8px; font-size:12px;" onchange="renderFees()">
+          <option value="ALL">All Types</option>
+          <option value="Coaching Batch">Coaching Batch</option>
+          <option value="Personal Tuition">Personal Tuition</option>
+        </select>
       </div>
-      <div id="profile-body"></div>
+      <div id="pendingFeeList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Recent Fee Receipts</div>
+      <div id="feeHistoryList"></div>
+    </div>
+  </section>
+
+  <!-- REPORTS TAB -->
+  <section id="tab-reports" class="hidden">
+    <div class="section-head">
+      <h1 class="section-title">Sync & Backup</h1>
+    </div>
+    <div class="card">
+      <div class="card-title">Cloud Sync (Google Sheets)</div>
+      <p class="item-meta">Keep local and cloud records aligned across your devices.</p>
+      <div class="actions-row" style="margin-top:10px;">
+        <button class="btn btn-primary" type="button" onclick="pushToCloud(false)">⬆ Push to Cloud</button>
+        <button class="btn btn-soft" type="button" onclick="pullFromCloud(false)">⬇ Pull from Cloud</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Local Backup & Sample Data</div>
+      <div class="actions-row">
+        <button class="btn btn-soft" type="button" onclick="downloadBackup()">⬇ Download JSON Backup</button>
+        <button class="btn btn-soft" type="button" onclick="loadSampleData()">Load Sample Students</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- WHATSAPP MODAL -->
+<div id="waModal" class="modal-backdrop" onclick="if(event.target===this) closeWaModal()">
+  <div class="modal-box">
+    <div class="item-top">
+      <div class="card-title" id="waModalTitle" style="margin:0;">WhatsApp Message</div>
+      <button class="btn btn-soft btn-sm" type="button" onclick="closeWaModal()">✕</button>
+    </div>
+    <textarea id="waMessageText" rows="9" style="margin-top:10px; font-size:13px;"></textarea>
+    <div class="actions-row" style="margin-top:12px;">
+      <a id="waSendLink" class="btn btn-wa" target="_blank" rel="noopener">Open in WhatsApp</a>
+      <button class="btn btn-soft" type="button" onclick="copyWaText()">Copy Text</button>
     </div>
   </div>
+</div>
 
-  <script>
-    /* ==========================================================================
-       0. GOOGLE SHEETS CLOUD SYNC CONFIGURATION
-       ========================================================================== */
-    const SYNC_URL = "https://script.google.com/macros/s/AKfycbwUyxjWYtC38y6Hrys5mjMmZs3Q4y3qIP2X4-KPe2yxGY6W_qBHkc2uFcp5YO0M83WQ/exec";
-    const SYNC_TOKEN = "CE_ADMIN_2026";
-    const PENDING_SYNC_KEY = "ce_pending_cloud_push";
+<nav class="bottom-nav">
+  <button id="nav-home" class="nav-btn active" type="button" onclick="switchTab('home')"><span class="nav-icon">🏠</span>Home</button>
+  <button id="nav-students" class="nav-btn" type="button" onclick="switchTab('students')"><span class="nav-icon">🎓</span>Students</button>
+  <button id="nav-attend" class="nav-btn" type="button" onclick="switchTab('attend')"><span class="nav-icon">✅</span>Attend</button>
+  <button id="nav-marks" class="nav-btn" type="button" onclick="switchTab('marks')"><span class="nav-icon">📝</span>Marks</button>
+  <button id="nav-fees" class="nav-btn" type="button" onclick="switchTab('fees')"><span class="nav-icon">₹</span>Fees</button>
+  <button id="nav-reports" class="nav-btn" type="button" onclick="switchTab('reports')"><span class="nav-icon">☁️</span>Sync</button>
+</nav>
 
-    function setSyncStatus(label, isOffline = false) {
-      const dot = document.getElementById('status-dot');
-      const txt = document.getElementById('status-text');
-      if (!dot || !txt) return;
-      dot.classList.toggle('offline', isOffline);
-      txt.textContent = label;
-    }
+<script>
+const SYNC_URL = "https://script.google.com/macros/s/AKfycbwr499iD0_60Y79a0f7K-o3n5K7T9L7tV0wG1uY8xR2cD6eF4bH9jM1nP3qS5tU7vW/exec";
+const SYNC_TOKEN = "CE_ADMIN_2026";
 
-    /* ==========================================================================
-       1. LOCAL APP ICON & CONNECTION STATUS
-       ========================================================================== */
-    (function setupPWA() {
-      const iconCanvas = document.createElement('canvas');
-      iconCanvas.width = 512;
-      iconCanvas.height = 512;
-      const ctx = iconCanvas.getContext('2d');
-      ctx.fillStyle = '#0F2A6B';
-      ctx.fillRect(0, 0, 512, 512);
-      ctx.fillStyle = '#F5B800';
-      ctx.beginPath();
-      ctx.roundRect(48, 48, 416, 416, 90);
-      ctx.fill();
-      ctx.fillStyle = '#091B47';
-      ctx.font = '900 190px -apple-system, BlinkMacSystemFont, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('CE', 256, 268);
-      const iconDataUrl = iconCanvas.toDataURL('image/png');
-      document.getElementById('apple-icon').href = iconDataUrl;
+const ALL_SUBJECTS = [
+  "Science",
+  "Maths",
+  "Accountancy",
+  "Business Studies",
+  "Economics",
+  "Finance",
+  "English",
+  "Political Science",
+  "Geography"
+];
 
-      function updateOnlineStatus() {
-        if (navigator.onLine) {
-          setSyncStatus('Online Ready', false);
-          if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
-            pushToCloud(false);
-          }
-        } else {
-          setSyncStatus('Offline Mode', true);
+const SUBJECT_PRESETS = {
+  "Class 8": ["Science", "Maths"],
+  "Class 9": ["Science", "Maths"],
+  "Class 10": ["Science", "Maths"],
+  "Class 11": ["Accountancy", "Business Studies", "Economics"],
+  "Class 12": ["Accountancy", "Business Studies", "Economics"]
+};
+
+const state = {
+  students: [],
+  attendance: [],
+  marks: [],
+  fees: []
+};
+
+let selectedSubjects = new Set(["Science", "Maths"]);
+let db;
+
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+function currentMonthStr() {
+  return new Date().toISOString().slice(0, 7);
+}
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.style.display = "block";
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(() => { el.style.display = "none"; }, 2600);
+}
+function setSyncStatus(mode, text) {
+  const dot = document.getElementById("syncDot");
+  const label = document.getElementById("syncText");
+  dot.className = "dot" + (mode === "ok" ? "" : mode === "err" ? " err" : " warn");
+  label.textContent = text;
+}
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open("CommerceEdgeDB", 1);
+    req.onupgradeneeded = (e) => {
+      const idb = e.target.result;
+      ["students", "attendance", "marks", "fees"].forEach((store) => {
+        if (!idb.objectStoreNames.contains(store)) {
+          idb.createObjectStore(store, { keyPath: "id" });
         }
-      }
-      window.addEventListener('online', updateOnlineStatus);
-      window.addEventListener('offline', updateOnlineStatus);
-      updateOnlineStatus();
-    })();
-
-    /* ==========================================================================
-       2. INDEXEDDB STORAGE ENGINE & CLOUD SYNC BRIDGE
-       ========================================================================== */
-    const DB_NAME = 'CommerceEdgeAdminDB';
-    const DB_VERSION = 1;
-    let db = null;
-
-    let state = {
-      students: [],
-      attendance: [],
-      marks: [],
-      fees: []
+      });
     };
+    req.onsuccess = (e) => { db = e.target.result; resolve(db); };
+    req.onerror = (e) => reject(e.target.error);
+  });
+}
 
-    function openDatabase() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, DB_VERSION);
-        req.onupgradeneeded = (e) => {
-          const database = e.target.result;
-          if (!database.objectStoreNames.contains('students')) {
-            database.createObjectStore('students', { keyPath: 'id' });
-          }
-          if (!database.objectStoreNames.contains('attendance')) {
-            database.createObjectStore('attendance', { keyPath: 'id' });
-          }
-          if (!database.objectStoreNames.contains('marks')) {
-            database.createObjectStore('marks', { keyPath: 'id' });
-          }
-          if (!database.objectStoreNames.contains('fees')) {
-            database.createObjectStore('fees', { keyPath: 'id' });
-          }
-        };
-        req.onsuccess = (e) => {
-          db = e.target.result;
-          resolve(db);
-        };
-        req.onerror = (e) => reject(e.target.error);
-      });
-    }
+function dbPut(storeName, record) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    tx.objectStore(storeName).put(record);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
 
-    function dbGetAll(storeName) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readonly');
-        const store = tx.objectStore(storeName);
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result || []);
-        req.onerror = () => reject(req.error);
-      });
-    }
+function dbDelete(storeName, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    tx.objectStore(storeName).delete(id);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
 
-    function dbPut(storeName, item) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readwrite');
-        const store = tx.objectStore(storeName);
-        const req = store.put(item);
-        req.onsuccess = () => resolve(item);
-        req.onerror = () => reject(req.error);
-      });
-    }
+function dbGetAll(storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const req = tx.objectStore(storeName).getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => reject(req.error);
+  });
+}
 
-    function dbDelete(storeName, id) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readwrite');
-        const store = tx.objectStore(storeName);
-        const req = store.delete(id);
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-      });
-    }
+async function loadFromIDB() {
+  state.students = (await dbGetAll("students")).map((s) => ({
+    ...s,
+    tuitionType: s.tuitionType || "Coaching Batch"
+  }));
+  state.attendance = await dbGetAll("attendance");
+  state.marks = await dbGetAll("marks");
+  state.fees = await dbGetAll("fees");
+}
 
-    function dbClear(storeName) {
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readwrite');
-        const store = tx.objectStore(storeName);
-        const req = store.clear();
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-      });
-    }
+function switchTab(tabName) {
+  ["home", "students", "attend", "marks", "fees", "reports"].forEach((t) => {
+    document.getElementById("tab-" + t).classList.toggle("hidden", t !== tabName);
+    document.getElementById("nav-" + t).classList.toggle("active", t === tabName);
+  });
+  renderAll();
+}
 
-    async function loadAllState() {
-      const [students, attendance, marks, fees] = await Promise.all([
-        dbGetAll('students'),
-        dbGetAll('attendance'),
-        dbGetAll('marks'),
-        dbGetAll('fees')
-      ]);
-      state.students = students.sort((a, b) => a.name.localeCompare(b.name));
-      state.attendance = attendance;
-      state.marks = marks.sort((a, b) => b.date.localeCompare(a.date));
-      state.fees = fees.sort((a, b) => b.date.localeCompare(a.date));
-    }
+function renderSubjectChips() {
+  const wrap = document.getElementById("subjectChips");
+  wrap.innerHTML = "";
+  ALL_SUBJECTS.forEach((subj) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip" + (selectedSubjects.has(subj) ? " active" : "");
+    btn.textContent = subj;
+    btn.onclick = () => {
+      if (selectedSubjects.has(subj)) selectedSubjects.delete(subj);
+      else selectedSubjects.add(subj);
+      renderSubjectChips();
+    };
+    wrap.appendChild(btn);
+  });
+}
 
-    function normalizeSheetRecords(records, type) {
-      if (!Array.isArray(records)) return [];
-      return records
-        .filter(r => r && r.id)
-        .map(r => {
-          const item = { ...r, id: String(r.id) };
-          if (type === 'students') {
-            if (typeof item.subjects === 'string') {
-              item.subjects = item.subjects.split(',').map(s => s.trim()).filter(Boolean);
-            } else if (!Array.isArray(item.subjects)) {
-              item.subjects = [];
-            }
-            item.totalFee = Number(item.totalFee || 0);
-            item.phone = String(item.phone || '');
-            item.guardianPhone = String(item.guardianPhone || '');
-            item.admissionDate = String(item.admissionDate || '').slice(0, 10);
-          } else if (type === 'attendance') {
-            item.studentId = String(item.studentId || '');
-            item.date = String(item.date || '').slice(0, 10);
-          } else if (type === 'marks') {
-            item.studentId = String(item.studentId || '');
-            item.date = String(item.date || '').slice(0, 10);
-            item.obtained = Number(item.obtained || 0);
-            item.max = Number(item.max || 100);
-          } else if (type === 'fees') {
-            item.studentId = String(item.studentId || '');
-            item.date = String(item.date || '').slice(0, 10);
-            item.amount = Number(item.amount || 0);
-          }
-          return item;
-        });
-    }
+function applyClassDefaults() {
+  const cls = document.getElementById("stuClass").value;
+  if (!document.getElementById("stuId").value) {
+    selectedSubjects = new Set(SUBJECT_PRESETS[cls] || ["Science", "Maths"]);
+    renderSubjectChips();
+  }
+}
 
-    async function pullFromCloud(notify = false) {
-      if (!SYNC_URL || !SYNC_URL.startsWith('http')) return;
-      if (!navigator.onLine) {
-        setSyncStatus('Offline Mode', true);
-        if (notify) showToast('Offline: using local data');
-        return;
-      }
-      if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
-        await pushToCloud(false);
-        return;
-      }
-      try {
-        setSyncStatus('Syncing...', false);
-        const res = await fetch(`${SYNC_URL}?token=${encodeURIComponent(SYNC_TOKEN)}`);
-        const json = await res.json();
-        if (!json.ok) {
-          setSyncStatus('Sync Auth Error', true);
-          if (notify) showToast('Sync failed: ' + (json.error || 'Auth error'));
-          return;
-        }
+function openAddStudentForm(student = null) {
+  const card = document.getElementById("studentFormCard");
+  card.classList.remove("hidden");
+  document.getElementById("studentFormTitle").textContent = student ? "Edit Student" : "Add New Student";
+  document.getElementById("stuId").value = student ? student.id : "";
+  document.getElementById("stuName").value = student ? student.name : "";
+  document.getElementById("stuPhone").value = student ? student.phone : "";
+  document.getElementById("stuType").value = student ? (student.tuitionType || "Coaching Batch") : "Coaching Batch";
+  document.getElementById("stuClass").value = student ? student.className : "Class 10";
+  document.getElementById("stuMonthlyFee").value = student ? student.monthlyFee : "";
+  document.getElementById("stuDue").value = student ? student.dueAmount : 0;
+  document.getElementById("stuBatch").value = student ? (student.batch || "") : "";
 
-        const cloudStudents = normalizeSheetRecords(json.students, 'students');
-        const cloudAttendance = normalizeSheetRecords(json.attendance, 'attendance');
-        const cloudMarks = normalizeSheetRecords(json.marks, 'marks');
-        const cloudFees = normalizeSheetRecords(json.fees, 'fees');
+  if (student && Array.isArray(student.subjects)) {
+    selectedSubjects = new Set(student.subjects);
+  } else {
+    const cls = document.getElementById("stuClass").value;
+    selectedSubjects = new Set(SUBJECT_PRESETS[cls] || ["Science", "Maths"]);
+  }
+  renderSubjectChips();
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 
-        await Promise.all([
-          dbClear('students'),
-          dbClear('attendance'),
-          dbClear('marks'),
-          dbClear('fees')
-        ]);
+function closeStudentForm() {
+  document.getElementById("studentFormCard").classList.add("hidden");
+  document.getElementById("studentForm").reset();
+}
 
-        for (const s of cloudStudents) await dbPut('students', s);
-        for (const a of cloudAttendance) await dbPut('attendance', a);
-        for (const m of cloudMarks) await dbPut('marks', m);
-        for (const f of cloudFees) await dbPut('fees', f);
+async function saveStudent(e) {
+  e.preventDefault();
+  const existingId = document.getElementById("stuId").value;
+  const student = {
+    id: existingId || ("STU_" + Date.now()),
+    name: document.getElementById("stuName").value.trim(),
+    phone: document.getElementById("stuPhone").value.trim(),
+    tuitionType: document.getElementById("stuType").value,
+    className: document.getElementById("stuClass").value,
+    monthlyFee: Number(document.getElementById("stuMonthlyFee").value || 0),
+    dueAmount: Number(document.getElementById("stuDue").value || 0),
+    batch: document.getElementById("stuBatch").value.trim(),
+    subjects: Array.from(selectedSubjects),
+    updatedAt: new Date().toISOString()
+  };
 
-        await loadAllState();
-        refreshAllViews();
-        setSyncStatus('Cloud Synced', false);
-        const info = document.getElementById('cloud-sync-info');
-        if (info) info.textContent = `Last synced: ${new Date().toLocaleTimeString()}`;
-        if (notify) showToast('Pulled latest records from Google Sheets');
-      } catch (err) {
-        console.warn('Cloud pull error:', err);
-        setSyncStatus('Local Storage Active', true);
-        if (notify) showToast('Could not reach Google Sheets');
-      }
-    }
+  await dbPut("students", student);
+  await loadFromIDB();
+  closeStudentForm();
+  renderAll();
+  showToast("Student saved locally");
+  pushToCloud(true);
+}
 
-    async function pushToCloud(notify = false) {
-      if (!SYNC_URL || !SYNC_URL.startsWith('http')) return;
-      if (!navigator.onLine) {
-        localStorage.setItem(PENDING_SYNC_KEY, '1');
-        setSyncStatus('Pending Sync', true);
-        if (notify) showToast('Offline: queued for sync');
-        return;
-      }
-      try {
-        setSyncStatus('Syncing...', false);
-        const res = await fetch(SYNC_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            token: SYNC_TOKEN,
-            data: state
-          })
-        });
-        const json = await res.json();
-        if (json.ok) {
-          localStorage.removeItem(PENDING_SYNC_KEY);
-          setSyncStatus('Cloud Synced', false);
-          const info = document.getElementById('cloud-sync-info');
-          if (info) info.textContent = `Last synced: ${new Date().toLocaleTimeString()}`;
-          if (notify) showToast('Pushed all records to Google Sheets');
-        } else {
-          localStorage.setItem(PENDING_SYNC_KEY, '1');
-          setSyncStatus('Sync Error', true);
-          if (notify) showToast('Sync error: ' + (json.error || 'Unknown'));
-        }
-      } catch (err) {
-        console.warn('Cloud push error:', err);
-        localStorage.setItem(PENDING_SYNC_KEY, '1');
-        setSyncStatus('Pending Sync', true);
-        if (notify) showToast('Saved locally; will sync when online');
-      }
-    }
+async function deleteStudent(id) {
+  if (!confirm("Remove this student record?")) return;
+  await dbDelete("students", id);
+  await loadFromIDB();
+  renderAll();
+  showToast("Student removed");
+  pushToCloud(true);
+}
 
-    function manualCloudSync() {
-      if (localStorage.getItem(PENDING_SYNC_KEY) === '1') {
-        pushToCloud(true);
-      } else {
-        pullFromCloud(true);
-      }
-    }
+function buildWhatsAppUrl(phone, text) {
+  const digits = String(phone || "").replace(/\D/g, "");
+  const normalized = digits.length === 10 ? "91" + digits : digits;
+  return `https://wa.me/${normalized}?text=${encodeURIComponent(text)}`;
+}
 
-    /* ==========================================================================
-       3. HELPERS & NAVIGATION
-       ========================================================================== */
-    function todayStr() {
-      const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now - offset).toISOString().slice(0, 10);
-    }
+function openWhatsAppModal(title, phone, message) {
+  document.getElementById("waModalTitle").textContent = title;
+  document.getElementById("waMessageText").value = message;
+  const link = document.getElementById("waSendLink");
+  link.href = buildWhatsAppUrl(phone, message);
+  link.onclick = () => {
+    link.href = buildWhatsAppUrl(phone, document.getElementById("waMessageText").value);
+  };
+  document.getElementById("waModal").classList.add("open");
+}
 
-    function currentMonthStr() {
-      return todayStr().slice(0, 7);
-    }
+function closeWaModal() {
+  document.getElementById("waModal").classList.remove("open");
+}
 
-    function formatINR(num) {
-      return '₹' + Number(num || 0).toLocaleString('en-IN');
-    }
+function copyWaText() {
+  const txt = document.getElementById("waMessageText").value;
+  navigator.clipboard?.writeText(txt).then(() => showToast("Message copied"));
+}
 
-    function uid(prefix) {
-      return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
-    }
+function sendFeeReminder(studentId) {
+  const stu = state.students.find((s) => s.id === studentId);
+  if (!stu) return;
+  const typeLabel = stu.tuitionType === "Personal Tuition" ? " • Personal Tuition" : "";
+  const subjectsStr = (stu.subjects || []).join(", ");
+  const msg = [
+    `Namaskar ${stu.name}'s Guardian,`,
+    `Friendly monthly fee reminder from *COMMERCE EDGE*.`,
+    `Student: *${stu.name}* (${stu.className}${typeLabel})`,
+    subjectsStr ? `Subjects: ${subjectsStr}` : "",
+    `Pending Fee Due: *₹${stu.dueAmount}*`,
+    `Kindly clear the balance at your convenience. Thank you!`
+  ].filter(Boolean).join("\n");
+  openWhatsAppModal(`Fee Reminder • ${stu.name}`, stu.phone, msg);
+}
 
-    function esc(str) {
-      return String(str ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
+function sendFeeReceipt(feeId) {
+  const fee = state.fees.find((f) => f.id === feeId);
+  if (!fee) return;
+  const stu = state.students.find((s) => s.id === fee.studentId) || {};
+  const tuitionType = fee.tuitionType || stu.tuitionType || "Coaching Batch";
+  const typeLabel = tuitionType === "Personal Tuition" ? " • Personal Tuition" : "";
+  const subjectsArr = Array.isArray(fee.subjects) && fee.subjects.length ? fee.subjects : (stu.subjects || []);
+  const subjectsStr = subjectsArr.join(", ");
 
-    function showToast(msg) {
-      const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.classList.add('show');
-      clearTimeout(el._timer);
-      el._timer = setTimeout(() => el.classList.remove('show'), 2300);
-    }
+  const msg = [
+    `*COMMERCE EDGE — FEE RECEIPT*`,
+    `Receipt No: *${fee.receiptNo}*`,
+    `Date: ${fee.date}`,
+    `Student: *${fee.studentName}* (${fee.className || stu.className || ""}${typeLabel})`,
+    subjectsStr ? `Subjects: ${subjectsStr}` : "",
+    `Amount Paid: *₹${fee.amount}* (${fee.mode || "UPI"})`,
+    fee.note ? `Particulars: ${fee.note}` : "",
+    `Thank you for your payment!`
+  ].filter(Boolean).join("\n");
 
-    function switchTab(tabName) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-      document.getElementById('screen-' + tabName).classList.add('active');
-      document.querySelector(`.nav-item[data-tab="${tabName}"]`).classList.add('active');
-      refreshAllViews();
-    }
+  openWhatsAppModal(`Receipt ${fee.receiptNo}`, stu.phone || "", msg);
+}
 
-    function openModal(id) {
-      document.getElementById(id).classList.add('open');
-    }
+function renderStudents() {
+  const q = (document.getElementById("studentSearch")?.value || "").toLowerCase().trim();
+  const typeFilter = document.getElementById("studentTypeFilter")?.value || "ALL";
+  const clsFilter = document.getElementById("studentClassFilter")?.value || "ALL";
+  const box = document.getElementById("studentsList");
 
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('open');
-    }
+  const filtered = state.students.filter((s) => {
+    const matchType = typeFilter === "ALL" || (s.tuitionType || "Coaching Batch") === typeFilter;
+    const matchCls = clsFilter === "ALL" || s.className === clsFilter;
+    const matchQ = !q || s.name.toLowerCase().includes(q) || String(s.phone || "").includes(q);
+    return matchType && matchCls && matchQ;
+  });
 
-    function populateBatchAndStudentDropdowns() {
-      const batches = [...new Set(state.students.map(s => s.batch).filter(Boolean))].sort();
-      const batchSelectIds = ['filter-batch', 'att-batch-filter', 'att-month-batch', 'report-batch-select'];
-      batchSelectIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const prev = el.value;
-        el.innerHTML = '<option value="">All Batches</option>' +
-          batches.map(b => `<option value="${esc(b)}">${esc(b)}</option>`).join('');
-        if (batches.includes(prev)) el.value = prev;
-      });
+  if (!filtered.length) {
+    box.innerHTML = `<div class="card"><div class="item-meta">No students match the current filter.</div></div>`;
+    return;
+  }
 
-      const studentOptions = state.students.map(s =>
-        `<option value="${esc(s.id)}">${esc(s.name)} (${esc(s.class)} • ${esc(s.batch)})</option>`
-      ).join('');
-
-      const marksFilter = document.getElementById('marks-student-filter');
-      const prevMarkStu = marksFilter.value;
-      marksFilter.innerHTML = '<option value="">All Students</option>' + studentOptions;
-      marksFilter.value = prevMarkStu;
-
-      ['exam-student', 'fee-student', 'report-student-select'].forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const prev = el.value;
-        el.innerHTML = state.students.length
-          ? studentOptions
-          : '<option value="">No students added yet</option>';
-        if (prev && state.students.some(s => s.id === prev)) el.value = prev;
-      });
-    }
-
-    /* ==========================================================================
-       4. DASHBOARD RENDERING
-       ========================================================================== */
-    function renderDashboard() {
-      const today = todayStr();
-      const month = currentMonthStr();
-      document.getElementById('dash-today-label').textContent = today;
-
-      const totalStudents = state.students.length;
-      const uniqueBatches = new Set(state.students.map(s => s.batch)).size;
-      document.getElementById('kpi-students').textContent = totalStudents;
-      document.getElementById('kpi-batches-sub').textContent = `${uniqueBatches} Active Batch${uniqueBatches === 1 ? '' : 'es'}`;
-
-      const todayAtt = state.attendance.filter(a => a.date === today);
-      const presentCount = todayAtt.filter(a => a.status === 'P').length;
-      const markedCount = todayAtt.length;
-      const attPct = markedCount > 0 ? Math.round((presentCount / markedCount) * 100) : 0;
-      document.getElementById('kpi-attendance').textContent = `${attPct}%`;
-      document.getElementById('kpi-att-sub').textContent = `${presentCount} Present / ${markedCount} Marked`;
-
-      const monthCollected = state.fees
-        .filter(f => f.date.startsWith(month))
-        .reduce((sum, f) => sum + Number(f.amount || 0), 0);
-      document.getElementById('kpi-collected').textContent = formatINR(monthCollected);
-      document.getElementById('kpi-month-sub').textContent = `Month: ${month}`;
-
-      let totalPending = 0;
-      let defaulters = 0;
-      state.students.forEach(stu => {
-        const paid = state.fees
-          .filter(f => f.studentId === stu.id)
-          .reduce((sum, f) => sum + Number(f.amount || 0), 0);
-        const due = Math.max(0, Number(stu.totalFee || 0) - paid);
-        totalPending += due;
-        if (due > 0) defaulters++;
-      });
-      document.getElementById('kpi-pending').textContent = formatINR(totalPending);
-      document.getElementById('kpi-defaulters-sub').textContent = `${defaulters} Student${defaulters === 1 ? '' : 's'} Due`;
-
-      const batchMap = {};
-      state.students.forEach(s => {
-        batchMap[s.batch] = (batchMap[s.batch] || 0) + 1;
-      });
-      const batchContainer = document.getElementById('dash-batch-breakdown');
-      const batchKeys = Object.keys(batchMap);
-      if (!batchKeys.length) {
-        batchContainer.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">No students enrolled yet. Tap "+ Add Student" to begin.</div>';
-      } else {
-        batchContainer.innerHTML = batchKeys.map(b => {
-          const pct = Math.round((batchMap[b] / totalStudents) * 100);
-          return `
-            <div style="margin-bottom:10px;">
-              <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
-                <span>${esc(b)}</span>
-                <span>${batchMap[b]} Students</span>
-              </div>
-              <div class="progress-track"><div class="progress-fill" style="width:${pct}%; background:var(--royal-700);"></div></div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const recentContainer = document.getElementById('dash-recent-fees');
-      const recentFees = state.fees.slice(0, 4);
-      if (!recentFees.length) {
-        recentContainer.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">No fee receipts recorded yet.</div>';
-      } else {
-        recentContainer.innerHTML = recentFees.map(f => {
-          const stu = state.students.find(s => s.id === f.studentId);
-          return `
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border);">
-              <div>
-                <div style="font-size:13px; font-weight:700;">${esc(stu ? stu.name : 'Deleted Student')}</div>
-                <div style="font-size:11px; color:var(--text-sub);">${esc(f.date)} • ${esc(f.mode)}</div>
-              </div>
-              <span class="badge badge-green">+${formatINR(f.amount)}</span>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    /* ==========================================================================
-       5. STUDENT MANAGEMENT (CRUD + SEARCH + PROFILE)
-       ========================================================================== */
-    function openStudentModal(studentId = null) {
-      const form = document.getElementById('form-student');
-      form.reset();
-      document.getElementById('stu-id').value = '';
-      document.getElementById('stu-admission').value = todayStr();
-      document.getElementById('student-modal-title').textContent = 'Add Student';
-
-      document.querySelectorAll('#stu-subjects-group input').forEach(cb => {
-        cb.checked = (cb.value === 'Accountancy' || cb.value === 'Business Studies');
-      });
-
-      if (studentId) {
-        const s = state.students.find(x => x.id === studentId);
-        if (!s) return;
-        document.getElementById('student-modal-title').textContent = 'Edit Student';
-        document.getElementById('stu-id').value = s.id;
-        document.getElementById('stu-name').value = s.name;
-        document.getElementById('stu-phone').value = s.phone;
-        document.getElementById('stu-admission').value = s.admissionDate;
-        document.getElementById('stu-class').value = s.class;
-        document.getElementById('stu-batch').value = s.batch;
-        document.getElementById('stu-guardian').value = s.guardianName;
-        document.getElementById('stu-guardian-phone').value = s.guardianPhone;
-        document.getElementById('stu-total-fee').value = s.totalFee;
-        document.querySelectorAll('#stu-subjects-group input').forEach(cb => {
-          cb.checked = (s.subjects || []).includes(cb.value);
-        });
-      }
-      openModal('modal-student');
-    }
-
-    async function saveStudent(e) {
-      e.preventDefault();
-      const subjects = Array.from(document.querySelectorAll('#stu-subjects-group input:checked')).map(c => c.value);
-      if (subjects.length === 0) {
-        alert('Please select at least one subject.');
-        return;
-      }
-
-      const id = document.getElementById('stu-id').value || uid('stu');
-      const studentObj = {
-        id,
-        name: document.getElementById('stu-name').value.trim(),
-        phone: document.getElementById('stu-phone').value.trim(),
-        admissionDate: document.getElementById('stu-admission').value,
-        class: document.getElementById('stu-class').value,
-        batch: document.getElementById('stu-batch').value.trim(),
-        subjects,
-        guardianName: document.getElementById('stu-guardian').value.trim(),
-        guardianPhone: document.getElementById('stu-guardian-phone').value.trim(),
-        totalFee: Number(document.getElementById('stu-total-fee').value || 0)
-      };
-
-      await dbPut('students', studentObj);
-      await loadAllState();
-      closeModal('modal-student');
-      refreshAllViews();
-      showToast('Student record saved');
-      pushToCloud(false);
-    }
-
-    async function deleteStudent(id) {
-      const stu = state.students.find(s => s.id === id);
-      if (!stu) return;
-      const confirmed = confirm(`Delete ${stu.name}?\n\nThis will also remove their attendance, exam marks, and fee payment records.`);
-      if (!confirmed) return;
-
-      await dbDelete('students', id);
-      const attToDelete = state.attendance.filter(a => a.studentId === id);
-      const marksToDelete = state.marks.filter(m => m.studentId === id);
-      const feesToDelete = state.fees.filter(f => f.studentId === id);
-
-      for (const a of attToDelete) await dbDelete('attendance', a.id);
-      for (const m of marksToDelete) await dbDelete('marks', m.id);
-      for (const f of feesToDelete) await dbDelete('fees', f.id);
-
-      await loadAllState();
-      refreshAllViews();
-      showToast('Student deleted');
-      pushToCloud(false);
-    }
-
-    function renderStudents() {
-      const q = document.getElementById('student-search').value.trim().toLowerCase();
-      const cls = document.getElementById('filter-class').value;
-      const batch = document.getElementById('filter-batch').value;
-
-      const filtered = state.students.filter(s => {
-        const matchQ = !q ||
-          s.name.toLowerCase().includes(q) ||
-          s.phone.toLowerCase().includes(q) ||
-          s.batch.toLowerCase().includes(q) ||
-          s.guardianName.toLowerCase().includes(q);
-        const matchCls = !cls || s.class === cls;
-        const matchBatch = !batch || s.batch === batch;
-        return matchQ && matchCls && matchBatch;
-      });
-
-      const container = document.getElementById('student-list');
-      if (!filtered.length) {
-        container.innerHTML = '<div class="card empty-state">No matching students found. Tap "+ New Student" to add one.</div>';
-        return;
-      }
-
-      container.innerHTML = filtered.map(s => {
-        const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
-        const bal = Math.max(0, Number(s.totalFee) - paid);
-        return `
-          <div class="student-item">
-            <div class="student-top">
-              <div>
-                <div class="student-name">${esc(s.name)}</div>
-                <div class="student-meta">
-                  <strong>${esc(s.class)}</strong> • Batch: ${esc(s.batch)}<br/>
-                  📞 ${esc(s.phone)} | Guardian: ${esc(s.guardianName)} (${esc(s.guardianPhone)})<br/>
-                  Admitted: ${esc(s.admissionDate)}
-                </div>
-              </div>
-              <div style="text-align:right;">
-                <span class="badge ${bal === 0 ? 'badge-green' : 'badge-amber'}">
-                  ${bal === 0 ? 'Fees Paid' : 'Due ' + formatINR(bal)}
-                </span>
-              </div>
-            </div>
-            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:5px;">
-              ${(s.subjects || []).map(sub => `<span class="badge badge-royal">${esc(sub)}</span>`).join('')}
-            </div>
-            <div class="student-actions">
-              <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openStudentProfile('${esc(s.id)}')">History</button>
-              <button class="btn btn-outline btn-sm" style="flex:1;" onclick="openStudentModal('${esc(s.id)}')">Edit</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteStudent('${esc(s.id)}')">Delete</button>
-            </div>
+  box.innerHTML = filtered.map((s) => {
+    const isPersonal = s.tuitionType === "Personal Tuition";
+    const typePill = isPersonal
+      ? `<span class="pill-personal">Personal Tuition</span>`
+      : `<span class="pill-tag">Batch</span>`;
+    const dueBadge = s.dueAmount > 0
+      ? `<span class="badge badge-warn">Due: ₹${s.dueAmount}</span>`
+      : `<span class="badge badge-ok">Fees Clear</span>`;
+    return `
+      <div class="list-item">
+        <div class="item-top">
+          <div>
+            <div class="item-name">${escapeHtml(s.name)} <span class="pill-tag">${escapeHtml(s.className)}</span> ${typePill}</div>
+            <div class="item-meta" style="margin-top:3px;">📞 ${escapeHtml(s.phone || "-")} ${s.batch ? "• " + escapeHtml(s.batch) : ""} • Monthly: ₹${s.monthlyFee || 0}</div>
+            <div class="item-meta" style="margin-top:3px;">Subjects: ${escapeHtml((s.subjects || []).join(", ") || "None")}</div>
           </div>
-        `;
-      }).join('');
-    }
-
-    function openStudentProfile(studentId) {
-      const s = state.students.find(x => x.id === studentId);
-      if (!s) return;
-
-      const attRecords = state.attendance.filter(a => a.studentId === studentId);
-      const pCount = attRecords.filter(a => a.status === 'P').length;
-      const attPct = attRecords.length ? Math.round((pCount / attRecords.length) * 100) : 0;
-
-      const marksRecords = state.marks.filter(m => m.studentId === studentId);
-      const feeRecords = state.fees.filter(f => f.studentId === studentId);
-      const totalPaid = feeRecords.reduce((sum, f) => sum + Number(f.amount), 0);
-      const balance = Math.max(0, Number(s.totalFee) - totalPaid);
-
-      document.getElementById('profile-title').textContent = s.name;
-      document.getElementById('profile-body').innerHTML = `
-        <div class="card" style="background:var(--royal-50);">
-          <div style="font-size:13px; line-height:1.6;">
-            <strong>Class & Batch:</strong> ${esc(s.class)} — ${esc(s.batch)}<br/>
-            <strong>Student Phone:</strong> ${esc(s.phone)}<br/>
-            <strong>Guardian:</strong> ${esc(s.guardianName)} (${esc(s.guardianPhone)})<br/>
-            <strong>Admission Date:</strong> ${esc(s.admissionDate)}<br/>
-            <strong>Attendance Rate:</strong> ${attPct}% (${pCount}/${attRecords.length} classes)<br/>
-            <strong>Fee Summary:</strong> Total ${formatINR(s.totalFee)} | Paid ${formatINR(totalPaid)} | <strong style="color:var(--red);">Due ${formatINR(balance)}</strong>
-          </div>
+          ${dueBadge}
         </div>
+        <div class="actions-row">
+          <button class="btn btn-soft btn-sm" type="button" onclick='openAddStudentForm(${JSON.stringify(s).replace(/'/g, "&apos;")})'>Edit</button>
+          ${s.dueAmount > 0 ? `<button class="btn btn-wa btn-sm" type="button" onclick="sendFeeReminder('${s.id}')">WA Reminder</button>` : ""}
+          <button class="btn btn-soft btn-sm" type="button" onclick="deleteStudent('${s.id}')">Delete</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 
-        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin:12px 0 6px;">Academic Performance History</div>
-        ${marksRecords.length ? `
-          <div class="table-wrap" style="margin-bottom:14px;">
-            <table>
-              <thead><tr><th>Exam</th><th>Subject</th><th>Score</th><th>%</th></tr></thead>
-              <tbody>
-                ${marksRecords.map(m => {
-                  const pct = ((m.obtained / m.max) * 100).toFixed(1);
-                  return `<tr><td>${esc(m.examTitle)}<br/><small style="color:var(--text-sub);">${esc(m.date)}</small></td><td>${esc(m.subject)}</td><td>${m.obtained}/${m.max}</td><td><strong>${pct}%</strong></td></tr>`;
-                }).join('')}
-              </tbody>
-            </table>
+async function markAttendance(studentId, status) {
+  const dateStr = document.getElementById("attDate").value || todayISO();
+  const stu = state.students.find((s) => s.id === studentId);
+  if (!stu) return;
+  const recId = `ATT_${dateStr}_${studentId}`;
+  await dbPut("attendance", {
+    id: recId,
+    date: dateStr,
+    studentId,
+    studentName: stu.name,
+    tuitionType: stu.tuitionType || "Coaching Batch",
+    className: stu.className,
+    status
+  });
+  await loadFromIDB();
+  renderAll();
+  showToast(`${stu.name}: ${status}`);
+  pushToCloud(true);
+}
+
+function renderAttendance() {
+  const dateStr = document.getElementById("attDate").value || todayISO();
+  const typeFilter = document.getElementById("attTypeFilter")?.value || "ALL";
+  const clsFilter = document.getElementById("attClassFilter")?.value || "ALL";
+  const box = document.getElementById("attendanceList");
+
+  const list = state.students.filter((s) => {
+    const matchType = typeFilter === "ALL" || (s.tuitionType || "Coaching Batch") === typeFilter;
+    const matchCls = clsFilter === "ALL" || s.className === clsFilter;
+    return matchType && matchCls;
+  });
+
+  if (!list.length) {
+    box.innerHTML = `<div class="card"><div class="item-meta">No students match the selected filter.</div></div>`;
+    return;
+  }
+
+  box.innerHTML = list.map((s) => {
+    const rec = state.attendance.find((a) => a.date === dateStr && a.studentId === s.id);
+    const status = rec ? rec.status : "Unmarked";
+    const badgeClass = status === "Present" ? "badge-ok" : status === "Absent" ? "badge-err" : "badge-warn";
+    const typePill = s.tuitionType === "Personal Tuition"
+      ? `<span class="pill-personal">Personal</span>`
+      : `<span class="pill-tag">Batch</span>`;
+    return `
+      <div class="list-item">
+        <div class="item-top">
+          <div>
+            <div class="item-name">${escapeHtml(s.name)} <span class="pill-tag">${escapeHtml(s.className)}</span> ${typePill}</div>
+            <div class="item-meta">${escapeHtml((s.subjects || []).join(", "))}</div>
           </div>
-        ` : '<div style="font-size:12px; color:var(--text-sub); margin-bottom:12px;">No exam marks recorded yet.</div>'}
+          <span class="badge ${badgeClass}">${status}</span>
+        </div>
+        <div class="actions-row">
+          <button class="btn btn-primary btn-sm" type="button" onclick="markAttendance('${s.id}', 'Present')">Present</button>
+          <button class="btn btn-soft btn-sm" type="button" onclick="markAttendance('${s.id}', 'Absent')">Absent</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 
-        <div style="font-weight:800; font-size:14px; color:var(--royal-900); margin:12px 0 6px;">Fee Payment History</div>
-        ${feeRecords.length ? `
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Date</th><th>Amount</th><th>Mode</th><th>Note</th></tr></thead>
-              <tbody>
-                ${feeRecords.map(f => `<tr><td>${esc(f.date)}</td><td><strong>${formatINR(f.amount)}</strong></td><td>${esc(f.mode)}</td><td>${esc(f.note || '-')}</td></tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-        ` : '<div style="font-size:12px; color:var(--text-sub);">No fee payments recorded yet.</div>'}
-      `;
-      openModal('modal-profile');
-    }
+function populateStudentSelects() {
+  const options = state.students.map((s) => {
+    const tag = s.tuitionType === "Personal Tuition" ? "Personal" : "Batch";
+    return `<option value="${s.id}">${escapeHtml(s.name)} (${escapeHtml(s.className)} • ${tag})</option>`;
+  }).join("");
+  const markSel = document.getElementById("markStudent");
+  const feeSel = document.getElementById("feeStudent");
+  if (markSel) markSel.innerHTML = options || `<option value="">No students available</option>`;
+  if (feeSel) {
+    feeSel.innerHTML = options || `<option value="">No students available</option>`;
+    prefillFeeAmount();
+  }
+}
 
-    /* ==========================================================================
-       6. ATTENDANCE MANAGEMENT (DAILY P/A/L & MONTHLY REPORT)
-       ========================================================================== */
-    let draftAttendance = {};
+async function saveMark(e) {
+  e.preventDefault();
+  const studentId = document.getElementById("markStudent").value;
+  const stu = state.students.find((s) => s.id === studentId);
+  if (!stu) return showToast("Select a student first");
 
-    function switchAttSubtab(sub) {
-      document.getElementById('att-tab-daily').classList.toggle('active', sub === 'daily');
-      document.getElementById('att-tab-monthly').classList.toggle('active', sub === 'monthly');
-      document.getElementById('att-daily-view').style.display = sub === 'daily' ? 'block' : 'none';
-      document.getElementById('att-monthly-view').style.display = sub === 'monthly' ? 'block' : 'none';
-      if (sub === 'daily') renderDailyAttendance();
-      else renderMonthlyAttendance();
-    }
+  const item = {
+    id: "MRK_" + Date.now(),
+    date: todayISO(),
+    studentId,
+    studentName: stu.name,
+    tuitionType: stu.tuitionType || "Coaching Batch",
+    className: stu.className,
+    subject: document.getElementById("markSubject").value,
+    exam: document.getElementById("markExam").value.trim(),
+    score: Number(document.getElementById("markScore").value),
+    maxScore: Number(document.getElementById("markMax").value)
+  };
+  await dbPut("marks", item);
+  await loadFromIDB();
+  document.getElementById("marksForm").reset();
+  document.getElementById("markMax").value = 50;
+  renderMarks();
+  showToast("Marks saved");
+  pushToCloud(true);
+}
 
-    function renderDailyAttendance() {
-      const dateInput = document.getElementById('att-date');
-      if (!dateInput.value) dateInput.value = todayStr();
-      const dateVal = dateInput.value;
-      const batchVal = document.getElementById('att-batch-filter').value;
+function renderMarks() {
+  const box = document.getElementById("marksList");
+  if (!state.marks.length) {
+    box.innerHTML = `<div class="card"><div class="item-meta">No exam marks recorded yet.</div></div>`;
+    return;
+  }
+  box.innerHTML = state.marks.slice().reverse().map((m) => `
+    <div class="list-item">
+      <div class="item-top">
+        <div>
+          <div class="item-name">${escapeHtml(m.studentName)} <span class="pill-tag">${escapeHtml(m.className)}</span></div>
+          <div class="item-meta">${escapeHtml(m.subject)} • ${escapeHtml(m.exam)} • ${m.date}</div>
+        </div>
+        <span class="badge badge-ok">${m.score} / ${m.maxScore}</span>
+      </div>
+    </div>
+  `).join("");
+}
 
-      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
-      const container = document.getElementById('att-student-rows');
+function prefillFeeAmount() {
+  const stuId = document.getElementById("feeStudent")?.value;
+  const stu = state.students.find((s) => s.id === stuId);
+  const amtInput = document.getElementById("feeAmount");
+  if (stu && amtInput) {
+    amtInput.value = stu.dueAmount > 0 ? stu.dueAmount : (stu.monthlyFee || "");
+  }
+}
 
-      if (!list.length) {
-        container.innerHTML = '<div class="card empty-state">No students available for this batch.</div>';
-        return;
-      }
+function generateReceiptNo() {
+  const ym = new Date().toISOString().slice(0, 7).replace("-", "");
+  const seq = String(state.fees.length + 1).padStart(4, "0");
+  return `CE-${ym}-${seq}`;
+}
 
-      draftAttendance = {};
-      list.forEach(s => {
-        const existing = state.attendance.find(a => a.date === dateVal && a.studentId === s.id);
-        if (existing) draftAttendance[s.id] = existing.status;
-      });
+async function saveFeePayment(e) {
+  e.preventDefault();
+  const stuId = document.getElementById("feeStudent").value;
+  const stu = state.students.find((s) => s.id === stuId);
+  if (!stu) return showToast("Select a student first");
 
-      container.innerHTML = list.map(s => {
-        const st = draftAttendance[s.id] || '';
-        return `
-          <div class="att-row" id="att-row-${esc(s.id)}">
+  const amount = Number(document.getElementById("feeAmount").value || 0);
+  if (amount <= 0) return showToast("Enter a valid amount");
+
+  const newDue = Math.max(0, Number(stu.dueAmount || 0) - amount);
+  const receiptNo = generateReceiptNo();
+  const feeRec = {
+    id: "FEE_" + Date.now(),
+    receiptNo,
+    date: todayISO(),
+    month: currentMonthStr(),
+    studentId: stu.id,
+    studentName: stu.name,
+    tuitionType: stu.tuitionType || "Coaching Batch",
+    className: stu.className,
+    subjects: Array.isArray(stu.subjects) ? [...stu.subjects] : [],
+    amount,
+    mode: document.getElementById("feeMode").value,
+    note: document.getElementById("feeNote").value.trim(),
+    balanceAfter: newDue
+  };
+
+  stu.dueAmount = newDue;
+  stu.updatedAt = new Date().toISOString();
+
+  await dbPut("fees", feeRec);
+  await dbPut("students", stu);
+  await loadFromIDB();
+  document.getElementById("feeForm").reset();
+  renderAll();
+  showToast(`Receipt ${receiptNo} created`);
+  pushToCloud(true);
+  sendFeeReceipt(feeRec.id);
+}
+
+function renderFees() {
+  const typeFilter = document.getElementById("feeTypeFilter")?.value || "ALL";
+  const pendingBox = document.getElementById("pendingFeeList");
+  const dueStudents = state.students.filter((s) => {
+    const matchType = typeFilter === "ALL" || (s.tuitionType || "Coaching Batch") === typeFilter;
+    return matchType && Number(s.dueAmount || 0) > 0;
+  });
+
+  if (!dueStudents.length) {
+    pendingBox.innerHTML = `<div class="item-meta">No pending fee dues for this filter.</div>`;
+  } else {
+    pendingBox.innerHTML = dueStudents.map((s) => {
+      const typePill = s.tuitionType === "Personal Tuition"
+        ? `<span class="pill-personal">Personal</span>`
+        : `<span class="pill-tag">Batch</span>`;
+      return `
+        <div class="list-item">
+          <div class="item-top">
             <div>
-              <div style="font-weight:800; font-size:14px; color:var(--royal-900);">${esc(s.name)}</div>
-              <div style="font-size:11px; color:var(--text-sub);">${esc(s.class)} • ${esc(s.batch)}</div>
+              <div class="item-name">${escapeHtml(s.name)} <span class="pill-tag">${escapeHtml(s.className)}</span> ${typePill}</div>
+              <div class="item-meta">📞 ${escapeHtml(s.phone || "-")} • ${escapeHtml((s.subjects || []).join(", "))}</div>
             </div>
-            <div class="att-btns">
-              <button type="button" class="att-pill ${st === 'P' ? 'active-P' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'P')">P</button>
-              <button type="button" class="att-pill ${st === 'A' ? 'active-A' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'A')">A</button>
-              <button type="button" class="att-pill ${st === 'L' ? 'active-L' : ''}" onclick="setStudentAtt('${esc(s.id)}', 'L')">L</button>
-            </div>
+            <span class="badge badge-warn">Due: ₹${s.dueAmount}</span>
           </div>
-        `;
-      }).join('');
-    }
-
-    function setStudentAtt(studentId, status) {
-      draftAttendance[studentId] = status;
-      const row = document.getElementById('att-row-' + studentId);
-      if (!row) return;
-      row.querySelectorAll('.att-pill').forEach(btn => {
-        btn.classList.remove('active-P', 'active-A', 'active-L');
-        if (btn.textContent === status) btn.classList.add('active-' + status);
-      });
-    }
-
-    function markAllAttendance(status) {
-      const batchVal = document.getElementById('att-batch-filter').value;
-      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
-      list.forEach(s => setStudentAtt(s.id, status));
-      showToast('Marked visible students as Present');
-    }
-
-    async function saveDailyAttendance() {
-      const dateVal = document.getElementById('att-date').value;
-      if (!dateVal) {
-        alert('Please select a valid date.');
-        return;
-      }
-      const entries = Object.entries(draftAttendance);
-      if (!entries.length) {
-        alert('Mark at least one student as P, A, or L before saving.');
-        return;
-      }
-      for (const [studentId, status] of entries) {
-        await dbPut('attendance', {
-          id: `${dateVal}_${studentId}`,
-          date: dateVal,
-          studentId,
-          status
-        });
-      }
-      await loadAllState();
-      renderDashboard();
-      showToast(`Attendance saved for ${dateVal}`);
-      pushToCloud(false);
-    }
-
-    function renderMonthlyAttendance() {
-      const monthInput = document.getElementById('att-month');
-      if (!monthInput.value) monthInput.value = currentMonthStr();
-      const monthVal = monthInput.value;
-      const batchVal = document.getElementById('att-month-batch').value;
-
-      const list = state.students.filter(s => !batchVal || s.batch === batchVal);
-      const container = document.getElementById('att-monthly-table');
-
-      if (!list.length) {
-        container.innerHTML = '<div class="card empty-state">No students found for this filter.</div>';
-        return;
-      }
-
-      const rows = list.map(s => {
-        const recs = state.attendance.filter(a => a.studentId === s.id && a.date.startsWith(monthVal));
-        const p = recs.filter(r => r.status === 'P').length;
-        const a = recs.filter(r => r.status === 'A').length;
-        const l = recs.filter(r => r.status === 'L').length;
-        const total = recs.length;
-        const pct = total ? Math.round((p / total) * 100) : 0;
-        return `
-          <tr>
-            <td><strong>${esc(s.name)}</strong><br/><small style="color:var(--text-sub);">${esc(s.batch)}</small></td>
-            <td style="color:var(--green); font-weight:700;">${p}</td>
-            <td style="color:var(--red); font-weight:700;">${a}</td>
-            <td style="color:var(--amber); font-weight:700;">${l}</td>
-            <td><strong>${pct}%</strong></td>
-          </tr>
-        `;
-      }).join('');
-
-      container.innerHTML = `
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Student</th><th>P</th><th>A</th><th>L</th><th>%</th></tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
+          <div class="actions-row">
+            <button class="btn btn-wa btn-sm" type="button" onclick="sendFeeReminder('${s.id}')">Send WA Reminder</button>
+          </div>
         </div>
       `;
-    }
+    }).join("");
+  }
 
-    /* ==========================================================================
-       7. MARKS MANAGEMENT
-       ========================================================================== */
-    function openExamModal() {
-      if (!state.students.length) {
-        alert('Please add a student first before entering exam marks.');
-        return;
-      }
-      document.getElementById('form-exam').reset();
-      document.getElementById('exam-date').value = todayStr();
-      document.getElementById('exam-max').value = 100;
-      populateBatchAndStudentDropdowns();
-      openModal('modal-exam');
-    }
-
-    async function saveExamMark(e) {
-      e.preventDefault();
-      const obtained = Number(document.getElementById('exam-obtained').value);
-      const max = Number(document.getElementById('exam-max').value);
-      if (obtained > max) {
-        alert('Marks obtained cannot exceed maximum marks.');
-        return;
-      }
-
-      const record = {
-        id: uid('mark'),
-        studentId: document.getElementById('exam-student').value,
-        examTitle: document.getElementById('exam-title').value.trim(),
-        date: document.getElementById('exam-date').value,
-        subject: document.getElementById('exam-subject').value,
-        obtained,
-        max
-      };
-
-      await dbPut('marks', record);
-      await loadAllState();
-      closeModal('modal-exam');
-      renderMarks();
-      showToast('Exam marks added');
-      pushToCloud(false);
-    }
-
-    async function deleteExamMark(id) {
-      if (!confirm('Delete this exam mark record?')) return;
-      await dbDelete('marks', id);
-      await loadAllState();
-      renderMarks();
-      showToast('Exam record deleted');
-      pushToCloud(false);
-    }
-
-    function renderMarks() {
-      const stuFilter = document.getElementById('marks-student-filter').value;
-      const subFilter = document.getElementById('marks-subject-filter').value;
-
-      const filtered = state.marks.filter(m => {
-        const matchStu = !stuFilter || m.studentId === stuFilter;
-        const matchSub = !subFilter || m.subject === subFilter;
-        return matchStu && matchSub;
-      });
-
-      const container = document.getElementById('marks-list');
-      if (!filtered.length) {
-        container.innerHTML = '<div class="card empty-state">No exam marks found. Tap "+ Add Marks" to record scores.</div>';
-        return;
-      }
-
-      container.innerHTML = filtered.map(m => {
-        const stu = state.students.find(s => s.id === m.studentId);
-        const pct = ((m.obtained / m.max) * 100).toFixed(1);
-        const badgeClass = pct >= 75 ? 'badge-green' : (pct >= 45 ? 'badge-gold' : 'badge-red');
-        return `
-          <div class="student-item">
-            <div class="student-top">
-              <div>
-                <div class="student-name">${esc(stu ? stu.name : 'Unknown Student')}</div>
-                <div class="student-meta">
-                  <strong>${esc(m.examTitle)}</strong> • ${esc(m.subject)}<br/>
-                  Date: ${esc(m.date)}
-                </div>
-              </div>
-              <div style="text-align:right;">
-                <div style="font-size:16px; font-weight:800; color:var(--royal-900);">${m.obtained} / ${m.max}</div>
-                <span class="badge ${badgeClass}">${pct}%</span>
-              </div>
-            </div>
-            <div style="margin-top:8px; display:flex; justify-content:flex-end;">
-              <button class="btn btn-danger btn-sm" onclick="deleteExamMark('${esc(m.id)}')">Delete</button>
-            </div>
+  const histBox = document.getElementById("feeHistoryList");
+  if (!state.fees.length) {
+    histBox.innerHTML = `<div class="item-meta">No fee receipts generated yet.</div>`;
+    return;
+  }
+  histBox.innerHTML = state.fees.slice().reverse().map((f) => {
+    const subjText = Array.isArray(f.subjects) && f.subjects.length ? ` • ${f.subjects.join(", ")}` : "";
+    return `
+      <div class="list-item">
+        <div class="item-top">
+          <div>
+            <div class="item-name">${escapeHtml(f.studentName)} <span class="pill-tag">${escapeHtml(f.receiptNo || "RECEIPT")}</span></div>
+            <div class="item-meta">${f.date} • ${escapeHtml(f.mode || "UPI")}${escapeHtml(subjText)} ${f.note ? "• " + escapeHtml(f.note) : ""}</div>
           </div>
-        `;
-      }).join('');
-    }
-
-    /* ==========================================================================
-       8. FEES MANAGEMENT
-       ========================================================================== */
-    function switchFeeSubtab(sub) {
-      document.getElementById('fee-tab-balances').classList.toggle('active', sub === 'balances');
-      document.getElementById('fee-tab-history').classList.toggle('active', sub === 'history');
-      document.getElementById('fee-balances-view').style.display = sub === 'balances' ? 'block' : 'none';
-      document.getElementById('fee-history-view').style.display = sub === 'history' ? 'block' : 'none';
-      renderFees();
-    }
-
-    function openFeePaymentModal(preselectStudentId = null) {
-      if (!state.students.length) {
-        alert('Please add a student first before recording fee payments.');
-        return;
-      }
-      document.getElementById('form-fee').reset();
-      document.getElementById('fee-date').value = todayStr();
-      populateBatchAndStudentDropdowns();
-      if (preselectStudentId) {
-        document.getElementById('fee-student').value = preselectStudentId;
-      }
-      updateFeeModalHint();
-      openModal('modal-fee');
-    }
-
-    function updateFeeModalHint() {
-      const stuId = document.getElementById('fee-student').value;
-      const stu = state.students.find(s => s.id === stuId);
-      const hint = document.getElementById('fee-balance-hint');
-      if (!stu) {
-        hint.textContent = '';
-        return;
-      }
-      const paid = state.fees.filter(f => f.studentId === stu.id).reduce((sum, f) => sum + Number(f.amount), 0);
-      const due = Math.max(0, Number(stu.totalFee) - paid);
-      hint.textContent = `Total Fee: ${formatINR(stu.totalFee)} | Paid: ${formatINR(paid)} | Balance Due: ${formatINR(due)}`;
-    }
-
-    async function saveFeePayment(e) {
-      e.preventDefault();
-      const amount = Number(document.getElementById('fee-amount').value);
-      if (amount <= 0) {
-        alert('Enter a valid payment amount.');
-        return;
-      }
-
-      const payment = {
-        id: uid('fee'),
-        studentId: document.getElementById('fee-student').value,
-        amount,
-        date: document.getElementById('fee-date').value,
-        mode: document.getElementById('fee-mode').value,
-        note: document.getElementById('fee-note').value.trim()
-      };
-
-      await dbPut('fees', payment);
-      await loadAllState();
-      closeModal('modal-fee');
-      refreshAllViews();
-      showToast(`Receipt of ${formatINR(amount)} saved`);
-      pushToCloud(false);
-    }
-
-    async function deleteFeePayment(id) {
-      if (!confirm('Delete this fee payment receipt?')) return;
-      await dbDelete('fees', id);
-      await loadAllState();
-      refreshAllViews();
-      showToast('Fee receipt deleted');
-      pushToCloud(false);
-    }
-
-    function renderFees() {
-      const q = document.getElementById('fee-search').value.trim().toLowerCase();
-      const list = state.students.filter(s => !q || s.name.toLowerCase().includes(q) || s.batch.toLowerCase().includes(q));
-
-      const balancesContainer = document.getElementById('fee-student-cards');
-      if (!list.length) {
-        balancesContainer.innerHTML = '<div class="card empty-state">No students found.</div>';
-      } else {
-        balancesContainer.innerHTML = list.map(s => {
-          const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
-          const total = Number(s.totalFee || 0);
-          const due = Math.max(0, total - paid);
-          const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 100;
-          return `
-            <div class="student-item">
-              <div class="student-top">
-                <div>
-                  <div class="student-name">${esc(s.name)}</div>
-                  <div class="student-meta">${esc(s.class)} • ${esc(s.batch)}</div>
-                </div>
-                <span class="badge ${due === 0 ? 'badge-green' : 'badge-red'}">
-                  ${due === 0 ? 'Cleared' : 'Due: ' + formatINR(due)}
-                </span>
-              </div>
-              <div style="display:flex; justify-content:space-between; font-size:12px; margin-top:10px; font-weight:700;">
-                <span>Paid: ${formatINR(paid)}</span>
-                <span>Total: ${formatINR(total)}</span>
-              </div>
-              <div class="progress-track">
-                <div class="progress-fill" style="width:${pct}%; background:${due === 0 ? 'var(--green)' : 'var(--gold-500)'};"></div>
-              </div>
-              <div style="margin-top:10px; display:flex; justify-content:flex-end;">
-                <button class="btn btn-primary btn-sm" onclick="openFeePaymentModal('${esc(s.id)}')">+ Record Payment</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-
-      const historyContainer = document.getElementById('fee-payments-list');
-      if (!state.fees.length) {
-        historyContainer.innerHTML = '<div class="card empty-state">No fee transactions recorded yet.</div>';
-      } else {
-        historyContainer.innerHTML = state.fees.map(f => {
-          const stu = state.students.find(s => s.id === f.studentId);
-          return `
-            <div class="student-item">
-              <div class="student-top">
-                <div>
-                  <div class="student-name">${esc(stu ? stu.name : 'Unknown Student')}</div>
-                  <div class="student-meta">Date: ${esc(f.date)} • Mode: ${esc(f.mode)} ${f.note ? '• ' + esc(f.note) : ''}</div>
-                </div>
-                <div style="text-align:right;">
-                  <div style="font-size:16px; font-weight:800; color:var(--green);">${formatINR(f.amount)}</div>
-                </div>
-              </div>
-              <div style="margin-top:8px; display:flex; justify-content:flex-end;">
-                <button class="btn btn-danger btn-sm" onclick="deleteFeePayment('${esc(f.id)}')">Delete Receipt</button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
-
-    /* ==========================================================================
-       9. REPORTS (CSV EXPORT) & JSON BACKUP / RESTORE
-       ========================================================================== */
-    function renderReportPreview() {
-      const container = document.getElementById('batch-report-preview');
-      if (!state.students.length) {
-        container.innerHTML = '<div style="font-size:12px; color:var(--text-sub);">Add students to view batch analytics.</div>';
-        return;
-      }
-
-      const batches = [...new Set(state.students.map(s => s.batch))].sort();
-      const rows = batches.map(b => {
-        const bStudents = state.students.filter(s => s.batch === b);
-        const ids = new Set(bStudents.map(s => s.id));
-        const totalFee = bStudents.reduce((s, x) => s + Number(x.totalFee || 0), 0);
-        const paidFee = state.fees.filter(f => ids.has(f.studentId)).reduce((s, f) => s + Number(f.amount || 0), 0);
-        const dueFee = Math.max(0, totalFee - paidFee);
-        return `
-          <tr>
-            <td><strong>${esc(b)}</strong></td>
-            <td>${bStudents.length}</td>
-            <td style="color:var(--green); font-weight:700;">${formatINR(paidFee)}</td>
-            <td style="color:var(--red); font-weight:700;">${formatINR(dueFee)}</td>
-          </tr>
-        `;
-      }).join('');
-
-      container.innerHTML = `
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Batch</th><th>Students</th><th>Collected</th><th>Pending</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
+          <span class="badge badge-ok">₹${f.amount}</span>
         </div>
-      `;
-    }
+        <div class="actions-row">
+          <button class="btn btn-wa btn-sm" type="button" onclick="sendFeeReceipt('${f.id}')">WA Receipt</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
 
-    function downloadFile(filename, content, mimeType) {
-      const blob = new Blob([content], { type: mimeType });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
+function renderDashboard() {
+  const dateStr = todayISO();
+  const monthStr = currentMonthStr();
+  document.getElementById("todayBadge").textContent = dateStr;
+  document.getElementById("kpiStudents").textContent = state.students.length;
 
-    function toCSVRow(arr) {
-      return arr.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',');
-    }
+  const personalCount = state.students.filter((s) => s.tuitionType === "Personal Tuition").length;
+  const batchCount = state.students.length - personalCount;
+  document.getElementById("kpiBatches").textContent = `${batchCount} Batch • ${personalCount} Personal`;
 
-    function exportBatchCSV() {
-      const batch = document.getElementById('report-batch-select').value;
-      const list = state.students.filter(s => !batch || s.batch === batch);
-      if (!list.length) {
-        alert('No student records to export.');
-        return;
-      }
+  const todayAtt = state.attendance.filter((a) => a.date === dateStr);
+  const presentCount = todayAtt.filter((a) => a.status === "Present").length;
+  const pct = todayAtt.length ? Math.round((presentCount / todayAtt.length) * 100) : 0;
+  document.getElementById("kpiAttendance").textContent = `${pct}%`;
+  document.getElementById("kpiAttSub").textContent = `${presentCount} Present / ${todayAtt.length} Marked`;
 
-      const headers = [
-        'Student ID', 'Name', 'Phone', 'Class', 'Batch', 'Subjects',
-        'Guardian Name', 'Guardian Phone', 'Admission Date',
-        'Classes Present', 'Total Classes Marked', 'Attendance %',
-        'Average Exam %', 'Total Fee (INR)', 'Paid Fee (INR)', 'Pending Fee (INR)'
-      ];
+  const monthCollected = state.fees
+    .filter((f) => (f.month || String(f.date || "").slice(0, 7)) === monthStr)
+    .reduce((sum, f) => sum + Number(f.amount || 0), 0);
+  document.getElementById("kpiCollected").textContent = `₹${monthCollected}`;
+  document.getElementById("kpiMonthSub").textContent = `Month: ${monthStr}`;
 
-      const lines = [toCSVRow(headers)];
-      list.forEach(s => {
-        const atts = state.attendance.filter(a => a.studentId === s.id);
-        const present = atts.filter(a => a.status === 'P').length;
-        const attPct = atts.length ? ((present / atts.length) * 100).toFixed(1) + '%' : '0%';
+  const dueStudents = state.students.filter((s) => Number(s.dueAmount || 0) > 0);
+  const totalPending = dueStudents.reduce((sum, s) => sum + Number(s.dueAmount || 0), 0);
+  document.getElementById("kpiPending").textContent = `₹${totalPending}`;
+  document.getElementById("kpiDueSub").textContent = `${dueStudents.length} Students Due`;
 
-        const stuMarks = state.marks.filter(m => m.studentId === s.id);
-        const avgPct = stuMarks.length
-          ? (stuMarks.reduce((acc, m) => acc + (m.obtained / m.max) * 100, 0) / stuMarks.length).toFixed(1) + '%'
-          : 'N/A';
+  const counts = {};
+  state.students.forEach((s) => {
+    counts[s.className] = (counts[s.className] || 0) + 1;
+  });
+  const summaryParts = Object.keys(counts).map((k) => `${k}: <strong>${counts[k]}</strong>`);
+  document.getElementById("classSummaryBox").innerHTML = summaryParts.length
+    ? summaryParts.join(" &nbsp;•&nbsp; ")
+    : "No students added yet. Tap '+ Add Student' to begin.";
+}
 
-        const paid = state.fees.filter(f => f.studentId === s.id).reduce((sum, f) => sum + Number(f.amount), 0);
-        const due = Math.max(0, Number(s.totalFee) - paid);
+function renderAll() {
+  renderDashboard();
+  populateStudentSelects();
+  renderStudents();
+  renderAttendance();
+  renderMarks();
+  renderFees();
+}
 
-        lines.push(toCSVRow([
-          s.id, s.name, s.phone, s.class, s.batch, (s.subjects || []).join('; '),
-          s.guardianName, s.guardianPhone, s.admissionDate,
-          present, atts.length, attPct,
-          avgPct, s.totalFee, paid, due
-        ]));
-      });
+function escapeHtml(str) {
+  return String(str || "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[m]));
+}
 
-      const fileLabel = batch ? batch.replace(/\s+/g, '_') : 'All_Batches';
-      downloadFile(`CommerceEdge_${fileLabel}_${todayStr()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8;');
-      showToast('Batch CSV exported');
-    }
-
-    function exportStudentCSV() {
-      const stuId = document.getElementById('report-student-select').value;
-      const s = state.students.find(x => x.id === stuId);
-      if (!s) {
-        alert('Please select a student.');
-        return;
-      }
-
-      const lines = [];
-      lines.push(toCSVRow(['COMMERCE EDGE ADMIN - STUDENT REPORT']));
-      lines.push(toCSVRow(['Name', s.name, 'Class', s.class, 'Batch', s.batch]));
-      lines.push(toCSVRow(['Phone', s.phone, 'Guardian', s.guardianName, 'Guardian Phone', s.guardianPhone]));
-      lines.push(toCSVRow(['Subjects', (s.subjects || []).join('; '), 'Admission Date', s.admissionDate]));
-      lines.push('');
-
-      lines.push(toCSVRow(['ATTENDANCE HISTORY']));
-      lines.push(toCSVRow(['Date', 'Status']));
-      state.attendance.filter(a => a.studentId === s.id).forEach(a => {
-        lines.push(toCSVRow([a.date, a.status]));
-      });
-      lines.push('');
-
-      lines.push(toCSVRow(['EXAMINATION MARKS']));
-      lines.push(toCSVRow(['Date', 'Exam', 'Subject', 'Obtained', 'Maximum', 'Percentage']));
-      state.marks.filter(m => m.studentId === s.id).forEach(m => {
-        lines.push(toCSVRow([m.date, m.examTitle, m.subject, m.obtained, m.max, ((m.obtained / m.max) * 100).toFixed(1) + '%']));
-      });
-      lines.push('');
-
-      lines.push(toCSVRow(['FEE LEDGER']));
-      lines.push(toCSVRow(['Date', 'Amount (INR)', 'Mode', 'Note']));
-      state.fees.filter(f => f.studentId === s.id).forEach(f => {
-        lines.push(toCSVRow([f.date, f.amount, f.mode, f.note]));
-      });
-
-      downloadFile(`CommerceEdge_${s.name.replace(/\s+/g, '_')}_${todayStr()}.csv`, lines.join('\n'), 'text/csv;charset=utf-8;');
-      showToast('Student CSV exported');
-    }
-
-    function exportJSONBackup() {
-      const backup = {
-        app: 'COMMERCE EDGE ADMIN',
-        exportedAt: new Date().toISOString(),
-        version: 1,
-        data: state
-      };
-      downloadFile(`CommerceEdge_Backup_${todayStr()}.json`, JSON.stringify(backup, null, 2), 'application/json');
-      showToast('JSON Backup downloaded');
-    }
-
-    function restoreJSONBackup(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        try {
-          const parsed = JSON.parse(e.target.result);
-          const payload = parsed.data || parsed;
-          if (!Array.isArray(payload.students) || !Array.isArray(payload.attendance) ||
-              !Array.isArray(payload.marks) || !Array.isArray(payload.fees)) {
-            throw new Error('Invalid backup structure');
-          }
-          if (!confirm(`Restore backup containing ${payload.students.length} students? Current data will be replaced.`)) {
-            return;
-          }
-
-          await Promise.all([
-            dbClear('students'),
-            dbClear('attendance'),
-            dbClear('marks'),
-            dbClear('fees')
-          ]);
-
-          for (const s of payload.students) await dbPut('students', s);
-          for (const a of payload.attendance) await dbPut('attendance', a);
-          for (const m of payload.marks) await dbPut('marks', m);
-          for (const f of payload.fees) await dbPut('fees', f);
-
-          await loadAllState();
-          refreshAllViews();
-          showToast('Backup restored successfully');
-          pushToCloud(false);
-        } catch (err) {
-          alert('Failed to restore backup: Invalid JSON file.');
-        } finally {
-          event.target.value = '';
+async function pushToCloud(silent = false) {
+  if (!navigator.onLine) {
+    setSyncStatus("warn", "Offline • Saved Locally");
+    if (!silent) showToast("Saved locally (offline)");
+    return;
+  }
+  setSyncStatus("warn", "Syncing...");
+  try {
+    await fetch(SYNC_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        token: SYNC_TOKEN,
+        action: "sync_push",
+        data: {
+          students: state.students,
+          attendance: state.attendance,
+          marks: state.marks,
+          fees: state.fees
         }
-      };
-      reader.readAsText(file);
-    }
-
-    async function seedDemoData() {
-      if (state.students.length > 0 && !confirm('Add sample students and records alongside existing data?')) {
-        return;
-      }
-      const t = todayStr();
-      const s1 = {
-        id: 'stu_demo_1', name: 'Aarav Kalita', phone: '9864011223', admissionDate: '2026-08-10',
-        class: 'Class 12', batch: 'Morning XII-A', subjects: ['Accountancy', 'Business Studies', 'Economics'],
-        guardianName: 'Pranab Kalita', guardianPhone: '9435011223', totalFee: 14000
-      };
-      const s2 = {
-        id: 'stu_demo_2', name: 'Priya Das', phone: '9864044556', admissionDate: '2026-08-12',
-        class: 'Class 12', batch: 'Morning XII-A', subjects: ['Accountancy', 'Finance', 'English'],
-        guardianName: 'Subrata Das', guardianPhone: '9435044556', totalFee: 14000
-      };
-      const s3 = {
-        id: 'stu_demo_3', name: 'Rohan Sharma', phone: '9864077889', admissionDate: '2026-09-01',
-        class: 'Class 11', batch: 'Evening XI-A', subjects: ['Accountancy', 'Business Studies', 'Economics', 'Finance'],
-        guardianName: 'Mahesh Sharma', guardianPhone: '9435077889', totalFee: 12000
-      };
-
-      for (const s of [s1, s2, s3]) await dbPut('students', s);
-      await dbPut('attendance', { id: `${t}_${s1.id}`, date: t, studentId: s1.id, status: 'P' });
-      await dbPut('attendance', { id: `${t}_${s2.id}`, date: t, studentId: s2.id, status: 'P' });
-      await dbPut('attendance', { id: `${t}_${s3.id}`, date: t, studentId: s3.id, status: 'L' });
-
-      await dbPut('marks', {
-        id: 'mark_demo_1', studentId: s1.id, examTitle: 'Unit Test 1',
-        date: t, subject: 'Accountancy', obtained: 86, max: 100
-      });
-      await dbPut('marks', {
-        id: 'mark_demo_2', studentId: s2.id, examTitle: 'Unit Test 1',
-        date: t, subject: 'Finance', obtained: 91, max: 100
-      });
-
-      await dbPut('fees', {
-        id: 'fee_demo_1', studentId: s1.id, amount: 7000, date: t, mode: 'UPI', note: '1st Installment'
-      });
-      await dbPut('fees', {
-        id: 'fee_demo_2', studentId: s2.id, amount: 14000, date: t, mode: 'Cash', note: 'Full Annual Fee'
-      });
-
-      await loadAllState();
-      refreshAllViews();
-      showToast('Sample data loaded');
-      pushToCloud(false);
-    }
-
-    async function clearAllDatabase() {
-      if (!confirm('Are you sure you want to permanently delete ALL students, attendance, marks, and fee records?')) {
-        return;
-      }
-      await Promise.all([
-        dbClear('students'),
-        dbClear('attendance'),
-        dbClear('marks'),
-        dbClear('fees')
-      ]);
-      await loadAllState();
-      refreshAllViews();
-      showToast('All records cleared');
-      pushToCloud(false);
-    }
-
-    /* ==========================================================================
-       10. APP BOOTSTRAP
-       ========================================================================== */
-    function refreshAllViews() {
-      populateBatchAndStudentDropdowns();
-      renderDashboard();
-      renderStudents();
-      renderDailyAttendance();
-      renderMonthlyAttendance();
-      renderMarks();
-      renderFees();
-      renderReportPreview();
-    }
-
-    window.addEventListener('DOMContentLoaded', async () => {
-      await openDatabase();
-      await loadAllState();
-      document.getElementById('att-date').value = todayStr();
-      document.getElementById('att-month').value = currentMonthStr();
-      refreshAllViews();
-      await pullFromCloud(false);
+      })
     });
-  </script>
-<script>if(location.protocol.startsWith('http')&&'serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(console.error);}</script>
+    setSyncStatus("ok", "Cloud Synced");
+    if (!silent) showToast("Pushed to Google Sheets");
+  } catch (err) {
+    setSyncStatus("err", "Sync Error");
+    if (!silent) showToast("Cloud push failed");
+  }
+}
+
+async function pullFromCloud(silent = false) {
+  if (!navigator.onLine) {
+    setSyncStatus("warn", "Offline");
+    return;
+  }
+  setSyncStatus("warn", "Pulling...");
+  try {
+    const res = await fetch(`${SYNC_URL}?token=${encodeURIComponent(SYNC_TOKEN)}&action=pull`);
+    const json = await res.json();
+    if (json && json.data) {
+      for (const store of ["students", "attendance", "marks", "fees"]) {
+        const rows = Array.isArray(json.data[store]) ? json.data[store] : [];
+        for (const r of rows) {
+          if (r && r.id) await dbPut(store, r);
+        }
+      }
+      await loadFromIDB();
+      renderAll();
+      setSyncStatus("ok", "Cloud Synced");
+      if (!silent) showToast("Pulled latest from Sheets");
+    } else {
+      setSyncStatus("ok", "Online Ready");
+    }
+  } catch (err) {
+    setSyncStatus("err", "Pull Failed");
+    if (!silent) showToast("Could not pull from Sheets");
+  }
+}
+
+function triggerSync() {
+  pushToCloud(false);
+}
+
+function downloadBackup() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `commerce-edge-backup-${todayISO()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast("Backup downloaded");
+}
+
+async function loadSampleData() {
+  const samples = [
+    { id: "STU_S1", name: "Rohan Kalita", phone: "9864011122", tuitionType: "Coaching Batch", className: "Class 9", monthlyFee: 1000, dueAmount: 1000, batch: "4:00 PM Batch", subjects: ["Science", "Maths"] },
+    { id: "STU_S2", name: "Diya Sarmah", phone: "9864022233", tuitionType: "Personal Tuition", className: "Class 10", monthlyFee: 2000, dueAmount: 0, batch: "Home Visit • 6:00 PM", subjects: ["Science", "Maths", "Geography"] },
+    { id: "STU_S3", name: "Aritra Bora", phone: "9864033344", tuitionType: "Personal Tuition", className: "Class 12", monthlyFee: 2500, dueAmount: 2500, batch: "Personal • Political Science", subjects: ["Political Science", "Geography", "English"] }
+  ];
+  for (const s of samples) await dbPut("students", s);
+  await loadFromIDB();
+  renderAll();
+  showToast("Sample Batch & Personal students added");
+}
+
+(async function init() {
+  document.getElementById("attDate").value = todayISO();
+  renderSubjectChips();
+  await openDB();
+  await loadFromIDB();
+  renderAll();
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+  if (navigator.onLine) {
+    pullFromCloud(true);
+  }
+})();
+</script>
 </body>
 </html>
